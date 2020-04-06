@@ -23,8 +23,13 @@ namespace DiagramConstructor
         private Master connector;
         private Master pageConnector;
         private Master line;
+        private Master textField;
+        private Master yesNoTextField;
 
         private Shape pervShape;
+
+        private Shape globalLastDropedShape;
+        private Shape globalLastChaneParentShape;
 
         private double coreX = 4.25;
         private double coreY = 11;
@@ -47,6 +52,8 @@ namespace DiagramConstructor
             connector = visioStencil.Masters.get_ItemU(@"Соединитель");
             pageConnector = visioStencil.Masters.get_ItemU(@"Межстраничный соединитель");
             line = visioStencil.Masters.get_ItemU(@"line");
+            textField = visioStencil.Masters.get_ItemU(@"textField");
+            yesNoTextField = visioStencil.Masters.get_ItemU(@"yesNo");
         }
 
         public void buildDiagram()
@@ -54,14 +61,18 @@ namespace DiagramConstructor
             visioApp.Documents.Add("");
             Page visioPage = visioApp.ActivePage;
 
-            pervShape = dropFigure(visioPage, begin, null, "Начало", coreX, coreY);
+            globalLastDropedShape = dropShape(begin, null, ShapeConnectionType.USAL, "Начало", coreX, coreY);
             coreY--;
 
-            Shape lastShape = buldSimpleDiagram(codeThree.main, pervShape, coreX, coreY);
+            foreach (Node node in codeThree.main)
+            {
+                qwe(node, coreX, coreY);
+            }
 
-            Shape endShape = dropFigure(visioPage, begin, null, "Конец", coreX, coreY);
+            Shape endShape = dropShape(begin, null, ShapeConnectionType.USAL, "Конец", coreX, coreY);
 
-            ConnectWithDynamicGlueAndConnector(lastShape, endShape, (short)VisCellIndices.visAlignRight, (short)VisCellIndices.visAlignTop);
+            //INVERTED SHAPES!!!
+            connectShaps(globalLastChaneParentShape, endShape, ShapeConnectionType.OUT_PARENT);
 
             String documetsRoot = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             visioApp.ActiveDocument.SaveAs(documetsRoot + @"\result.vsdx");
@@ -69,60 +80,74 @@ namespace DiagramConstructor
             visioStencil.Close();
         }
 
-        public Shape buldSimpleDiagram(List<Node> nodes, Shape chainParentShape, double x, double y)
+        public void qwe(Node node, double x, double y)
+        {
+            Master figureMasterToAdd = getFigureMasterByNodeType(node.nodeType);
+            if (node.nodeType == NodeType.IF)
+            {
+            }
+            else if(node.nodeType != NodeType.COMMON && node.nodeType != NodeType.INOUTPUT)
+            {
+                Shape shapeCopy = dropShape(figureMasterToAdd, globalLastDropedShape, ShapeConnectionType.USAL, node.nodeText, x, y);
+                globalLastDropedShape = shapeCopy;
+                if (node.nodeType == NodeType.FOR)
+                { 
+                }
+                else if(node.nodeType == NodeType.WHILE)
+                {
+                    addTextBox("Да", x + 0.38, y - 0.5);
+                    addTextBox("Нет", x + 0.7, y + 0.2);
+                    y -= 0.2;
+                }
+                buldSimpleDiagram(node.childNodes, globalLastDropedShape, x, y - 1);
+                if (globalLastChaneParentShape != null)
+                {
+                    connectShaps(globalLastChaneParentShape, globalLastDropedShape, ShapeConnectionType.OUT_PARENT);
+                }
+                globalLastChaneParentShape = shapeCopy;
+                globalLastDropedShape = null;
+            }
+            else
+            {
+                globalLastDropedShape = dropShape(figureMasterToAdd, globalLastDropedShape, ShapeConnectionType.USAL, node.nodeText, x, y);
+            }
+        }
+
+        public void buldSimpleDiagram(List<Node> nodes, Shape chainParentShape, double x, double y)
         {
             Page visioPage = visioApp.ActivePage;
-            Shape preEndFigure = chainParentShape;
             foreach (Node node in nodes)
             {
-                Master figureMasterToAdd = getFigureMasterByNodeType(node.nodeType);
-                preEndFigure = dropFigure(visioPage, figureMasterToAdd, preEndFigure, node.nodeText, x, y);
-                pervShape = preEndFigure;
-                if (node.nodeType == NodeType.IF)
+                if (node.nodeType == NodeType.COMMON)
                 {
-                    addTextBox("Да", x - 1.2, y + 0.2);
-                    buldSimpleDiagram(node.childIfNodes, pervShape, x - 1.3, y - 1);
-                    addTextBox("Нет", x + 1.2, y + 0.2);
-                    buldSimpleDiagram(node.childElseNodes, pervShape, x + 1.3, y - 1);
-                    y -= Math.Max(node.childIfNodes.Count, node.childElseNodes.Count);
+                    Master figureMasterToAdd = getFigureMasterByNodeType(node.nodeType);
+                    globalLastDropedShape = dropShape(figureMasterToAdd, globalLastDropedShape, ShapeConnectionType.USAL, node.nodeText, x, y);
                 }
-                else if (node.nodeType == NodeType.FOR)
+                else
                 {
-                    buldSimpleDiagram(node.childNodes, pervShape, x, y - 1);
+                    qwe(node, x, y);
                     y -= node.childNodes.Count;
                 }
-                else if (node.nodeType == NodeType.WHILE)
-                {
-                    y -= 0.2;
-                    addTextBox("Да", x + 0.3, y - 0.3);
-                    addTextBox("Нет", x + 1.2, y + 0.4);
-                    buldSimpleDiagram(node.childNodes, pervShape, x, y - 1);
-                    y -= node.childNodes.Count;
-                }
-                y -= 1.2;
+                y--;
             }
             if (chainParentShape != null)
             {
-                //TO DO normalize line connections
-                ConnectWithDynamicGlueAndConnector(chainParentShape, pervShape, (short)VisCellIndices.visAlignLeft, (short)VisCellIndices.visAlignBottom);
-                //chainParentShape.AutoConnect(pervShape, VisAutoConnectDir.visAutoConnectDirNone, line);
+                connectShaps(chainParentShape, globalLastDropedShape, ShapeConnectionType.BACK_PARENT);
             }
             if (y < coreY)
             {
                 coreY = y;
             }
-            return preEndFigure;
         }
 
-    public Shape dropFigure(Page visioPage, Master figure, Shape prevShape, String text, double x, double y)
+    public Shape dropShape(Master figure, Shape prevShape, ShapeConnectionType connectionType, String text, double x, double y)
         {
+            Page visioPage = visioApp.ActivePage;
             Shape shapeToDrop = visioPage.Drop(figure, x, y);
             shapeToDrop.Text = text;
             if (prevShape != null)
             {
-                //TO DO normalize line connections
-                //ConnectWithDynamicGlueAndConnector(shapeToDrop, prevShape, (short)VisCellIndices.visAlignTop, (short)VisCellIndices.visAlignBottom);
-                shapeToDrop.AutoConnect(prevShape, VisAutoConnectDir.visAutoConnectDirNone, line);
+                connectShaps(shapeToDrop, prevShape, connectionType);
             }
             return shapeToDrop;
         }
@@ -130,13 +155,42 @@ namespace DiagramConstructor
     public Shape addTextBox(String text, double x, double y)
         {
             Page visioPage = visioApp.ActivePage;
-            Shape shape = dropFigure(visioPage, process, null, text, x, y);
-            shape.LineStyle = "None";
-            shape.Style = "None";
+            Shape shape = dropShape(yesNoTextField, null, ShapeConnectionType.USAL, text, x, y);
             return shape;
         }
 
-        public Master getFigureMasterByNodeType(NodeType nodeType)
+    public void connectShaps(Shape shapeFrom, Shape shapeTo, ShapeConnectionType connectionType)
+        {
+            VisCellIndices conectionToType = VisCellIndices.visAlignTop;
+            VisCellIndices conectionFromType = VisCellIndices.visAlignBottom;
+            switch (connectionType)
+            {
+                case ShapeConnectionType.USAL:
+                    conectionToType = VisCellIndices.visAlignTop;
+                    conectionFromType = VisCellIndices.visAlignBottom;
+                    break;
+                case ShapeConnectionType.IF_BRANCH:
+                    conectionToType = VisCellIndices.visAlignTop;
+                    conectionFromType = VisCellIndices.visAlignLeft;
+                    break;
+                case ShapeConnectionType.ELSE_BRANCH:
+                    conectionToType = VisCellIndices.visAlignTop;
+                    conectionFromType = VisCellIndices.visAlignRight;
+                    break;
+                case ShapeConnectionType.BACK_PARENT:
+                    conectionToType = VisCellIndices.visAlignLeft;
+                    conectionFromType = VisCellIndices.visAlignBottom;
+                    break;
+                //INVERTED ALIGNS!!!
+                case ShapeConnectionType.OUT_PARENT:
+                    conectionToType = VisCellIndices.visAlignRight;
+                    conectionFromType = VisCellIndices.visAlignTop;
+                    break;
+            }
+            ConnectWithDynamicGlueAndConnector(shapeFrom, shapeTo, conectionToType, conectionFromType);
+        }
+
+    public Master getFigureMasterByNodeType(NodeType nodeType)
         {
             Master resultFigure = begin;
             switch (nodeType)
@@ -160,7 +214,7 @@ namespace DiagramConstructor
             return resultFigure;
         }
 
-        private void ConnectWithDynamicGlueAndConnector(Shape shapeFrom, Shape shapeTo, short fromPoint, short toPoint)
+        private void ConnectWithDynamicGlueAndConnector(Shape shapeFrom, Shape shapeTo, VisCellIndices fromPoint, VisCellIndices toPoint)
         {
             Cell beginXCell;
             Cell endXCell;

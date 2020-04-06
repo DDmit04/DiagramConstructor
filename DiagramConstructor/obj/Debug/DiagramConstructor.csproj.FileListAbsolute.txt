@@ -5,7 +5,6 @@ C:\Users\danya\source\repos\DiagramConstructor\DiagramConstructor\bin\Debug\Diag
 C:\Users\danya\source\repos\DiagramConstructor\DiagramConstructor\bin\Debug\DiagramConstructor.pdb
 C:\Users\danya\source\repos\DiagramConstructor\DiagramConstructor\obj\Debug\DiagramConstructor.exe
 C:\Users\danya\source\repos\DiagramConstructor\DiagramConstructor\obj\Debug\DiagramConstructor.pdb
-C:\Users\danya\source\repos\DiagramConstructor\DiagramConstructor\bin\Debug\Help\Moy_Gost.vssx
 C:\Users\danya\source\repos\DiagramConstructor\DiagramConstructor\bin\Debug\Help\Converter.html
 C:\Users\danya\source\repos\DiagramConstructor\DiagramConstructor\bin\Debug\Help\Shapes.vssx
 C:\Users\danya\source\repos\DiagramConstructor\DiagramConstructor\obj\Debug\DiagramConstructor.csprojAssemblyReference.cache

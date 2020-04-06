@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App.cs" />
+    <Compile Include="ShapeConnectionType.cs" />
     <Compile Include="NodeType.cs" />
     <Compile Include="CodeParser.cs" />
     <Compile Include="CodeThree.cs" />
@@ -54,9 +55,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="Help\Moy_Gost.vssx">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="Help\Shapes.vssx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
