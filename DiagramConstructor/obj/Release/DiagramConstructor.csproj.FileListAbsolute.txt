@@ -1,0 +1,8 @@
+C:\Users\danya\source\repos\DiagramConstructor\DiagramConstructor\bin\Release\DiagramConstructor.exe.config
+C:\Users\danya\source\repos\DiagramConstructor\DiagramConstructor\bin\Release\DiagramConstructor.exe
+C:\Users\danya\source\repos\DiagramConstructor\DiagramConstructor\bin\Release\DiagramConstructor.pdb
+C:\Users\danya\source\repos\DiagramConstructor\DiagramConstructor\obj\Release\DiagramConstructor.csprojAssemblyReference.cache
+C:\Users\danya\source\repos\DiagramConstructor\DiagramConstructor\obj\Release\DiagramConstructor.csproj.ResolveComReference.cache
+C:\Users\danya\source\repos\DiagramConstructor\DiagramConstructor\obj\Release\DiagramConstructor.csproj.CoreCompileInputs.cache
+C:\Users\danya\source\repos\DiagramConstructor\DiagramConstructor\obj\Release\DiagramConstructor.exe
+C:\Users\danya\source\repos\DiagramConstructor\DiagramConstructor\obj\Release\DiagramConstructor.pdb

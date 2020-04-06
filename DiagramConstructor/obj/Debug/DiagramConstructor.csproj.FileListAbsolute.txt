@@ -1,0 +1,11 @@
+C:\Users\danya\source\repos\DiagramConstructor\DiagramConstructor\obj\Debug\DiagramConstructor.csproj.ResolveComReference.cache
+C:\Users\danya\source\repos\DiagramConstructor\DiagramConstructor\obj\Debug\DiagramConstructor.csproj.CoreCompileInputs.cache
+C:\Users\danya\source\repos\DiagramConstructor\DiagramConstructor\bin\Debug\DiagramConstructor.exe.config
+C:\Users\danya\source\repos\DiagramConstructor\DiagramConstructor\bin\Debug\DiagramConstructor.exe
+C:\Users\danya\source\repos\DiagramConstructor\DiagramConstructor\bin\Debug\DiagramConstructor.pdb
+C:\Users\danya\source\repos\DiagramConstructor\DiagramConstructor\obj\Debug\DiagramConstructor.exe
+C:\Users\danya\source\repos\DiagramConstructor\DiagramConstructor\obj\Debug\DiagramConstructor.pdb
+C:\Users\danya\source\repos\DiagramConstructor\DiagramConstructor\bin\Debug\Help\Moy_Gost.vssx
+C:\Users\danya\source\repos\DiagramConstructor\DiagramConstructor\bin\Debug\Help\Converter.html
+C:\Users\danya\source\repos\DiagramConstructor\DiagramConstructor\bin\Debug\Help\Shapes.vssx
+C:\Users\danya\source\repos\DiagramConstructor\DiagramConstructor\obj\Debug\DiagramConstructor.csprojAssemblyReference.cache

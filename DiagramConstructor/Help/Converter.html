@@ -1,0 +1,51 @@
+﻿<html>
+<head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="container">
+
+            <div class="card border-primary mt-3">
+                <div class="card-header border-primary">Convert code to singleline</div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label>Paste your code here:</label>
+                        <textarea id="codeToConvertInput" class="form-control" rows="5"></textarea>
+                        <button id="convertBtn" type="button" class="btn btn-primary mt-2">Convert</button>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-primary mt-3 mb-3">
+                <div class="card-header border-primary">Result</div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <textarea id="resultCode" class="form-control" rows="2" readonly></textarea>
+                        <button id="copyBtn" type="button" class="btn btn-primary mt-2">Copy</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+<script>
+var codeToConvert = document.getElementById('codeToConvertInput');
+var copyBtn = document.getElementById('copyBtn');
+var convertBtn = document.getElementById('convertBtn');
+var resultCode = document.getElementById('resultCode');
+
+convertBtn.addEventListener('click', () => {
+    resultCode.value = codeToConvert.value.split('"').join('\'');
+    resultCode.value = resultCode.value.replace(/\r|\n/g, '');
+    resultCode.value = resultCode.value.split(' ').join('');
+});
+
+copyBtn.addEventListener('click', () => {
+    resultCode.select();
+    document.execCommand("copy");
+});
+
+</script>
