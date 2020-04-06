@@ -57,14 +57,16 @@ namespace DiagramConstructor
             pervShape = dropFigure(visioPage, begin, null, "Начало", coreX, coreY);
             coreY--;
 
-            Shape lastFigure = buldSimpleDiagram(codeThree.main, null, coreX, coreY);
+            Shape lastShape = buldSimpleDiagram(codeThree.main, pervShape, coreX, coreY);
 
-            dropFigure(visioPage, begin, lastFigure, "Конец", coreX, coreY);
+            Shape endShape = dropFigure(visioPage, begin, null, "Конец", coreX, coreY);
 
-            String documetsRoot = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
+            ConnectWithDynamicGlueAndConnector(lastShape, endShape, (short)VisCellIndices.visAlignRight, (short)VisCellIndices.visAlignTop);
+
+            String documetsRoot = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             visioApp.ActiveDocument.SaveAs(documetsRoot + @"\result.vsdx");
-            //visioApp.ActiveDocument.Close();
-            //visioStencil.Close();
+            visioApp.ActiveDocument.Close();
+            visioStencil.Close();
         }
 
         public Shape buldSimpleDiagram(List<Node> nodes, Shape chainParentShape, double x, double y)
@@ -83,13 +85,11 @@ namespace DiagramConstructor
                     addTextBox("Нет", x + 1.2, y + 0.2);
                     buldSimpleDiagram(node.childElseNodes, pervShape, x + 1.3, y - 1);
                     y -= Math.Max(node.childIfNodes.Count, node.childElseNodes.Count);
-                    y -= 0.2;
                 }
                 else if (node.nodeType == NodeType.FOR)
                 {
                     buldSimpleDiagram(node.childNodes, pervShape, x, y - 1);
                     y -= node.childNodes.Count;
-                    y -= 0.2;
                 }
                 else if (node.nodeType == NodeType.WHILE)
                 {
@@ -98,14 +98,13 @@ namespace DiagramConstructor
                     addTextBox("Нет", x + 1.2, y + 0.4);
                     buldSimpleDiagram(node.childNodes, pervShape, x, y - 1);
                     y -= node.childNodes.Count;
-                    y -= 0.2;
                 }
-                y--;
+                y -= 1.2;
             }
             if (chainParentShape != null)
             {
                 //TO DO normalize line connections
-                //ConnectWithDynamicGlueAndConnector(chainParentShape, pervShape);
+                ConnectWithDynamicGlueAndConnector(chainParentShape, pervShape, (short)VisCellIndices.visAlignLeft, (short)VisCellIndices.visAlignBottom);
                 //chainParentShape.AutoConnect(pervShape, VisAutoConnectDir.visAutoConnectDirNone, line);
             }
             if (y < coreY)
@@ -115,15 +114,15 @@ namespace DiagramConstructor
             return preEndFigure;
         }
 
-    public Shape dropFigure(Page visioPage, Master figure, Shape prevFigure, String text, double x, double y)
+    public Shape dropFigure(Page visioPage, Master figure, Shape prevShape, String text, double x, double y)
         {
             Shape shapeToDrop = visioPage.Drop(figure, x, y);
             shapeToDrop.Text = text;
-            if (prevFigure != null)
+            if (prevShape != null)
             {
                 //TO DO normalize line connections
-                //ConnectWithDynamicGlueAndConnector(shapeToDrop, pervShape);
-                //shapeToDrop.AutoConnect(prevFigure, VisAutoConnectDir.visAutoConnectDirNone, line);
+                //ConnectWithDynamicGlueAndConnector(shapeToDrop, prevShape, (short)VisCellIndices.visAlignTop, (short)VisCellIndices.visAlignBottom);
+                shapeToDrop.AutoConnect(prevShape, VisAutoConnectDir.visAutoConnectDirNone, line);
             }
             return shapeToDrop;
         }
@@ -161,7 +160,7 @@ namespace DiagramConstructor
             return resultFigure;
         }
 
-        private void ConnectWithDynamicGlueAndConnector(Shape shapeFrom, Shape shapeTo)
+        private void ConnectWithDynamicGlueAndConnector(Shape shapeFrom, Shape shapeTo, short fromPoint, short toPoint)
         {
             Cell beginXCell;
             Cell endXCell;
@@ -176,9 +175,9 @@ namespace DiagramConstructor
                 (short)VisCellIndices.vis1DBeginX);
 
             beginXCell.GlueTo(shapeFrom.get_CellsSRC(
-                (short)VisSectionIndices.visSectionObject,
-                (short)VisRowIndices.visRowXFormOut,
-                (short)VisCellIndices.visXFormPinX));
+                (short) VisSectionIndices.visSectionObject,
+                (short) VisRowIndices.visRowAlign,
+                (short) fromPoint));
 
             endXCell = connector.get_CellsSRC(
                 (short)VisSectionIndices.visSectionObject,
@@ -186,9 +185,9 @@ namespace DiagramConstructor
                 (short)VisCellIndices.vis1DEndX);
 
             endXCell.GlueTo(shapeTo.get_CellsSRC(
-                (short)VisSectionIndices.visSectionObject,
-                (short)VisRowIndices.visRowXFormOut,
-                (short)VisCellIndices.visXFormPinX));
+                (short) VisSectionIndices.visSectionObject,
+                (short) VisRowIndices.visRowAlign,
+                (short) toPoint));
         }
 
     }

@@ -15,7 +15,7 @@ namespace DiagramConstructor
             String code = "";
             if (test)
             {
-                code = "if(a=0){int a = 10;int b -= 10;}else{t = 0;}";
+                code = "for(a=0){int a = 10;int b -= 10;}";
             }
             else
             {
