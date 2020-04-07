@@ -152,7 +152,6 @@ namespace DiagramConstructor
                 }
                 //set last added shape as new code branch parent (when last brunch is ended by 'buldTreeBranch')
                 globalLastChaineParentShape = currentNodeShape;
-                //do not connect shapes from different branches
             }
         }
 

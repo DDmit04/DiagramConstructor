@@ -19,8 +19,16 @@ namespace DiagramConstructor
             }
             else
             {
+                String answer = "";
+                while(answer != "Y" && answer != "N") {
+                    Console.WriteLine("open code converter?[Y/N]");
+                    answer = Console.ReadLine();
+                }
+                if(answer == "Y")
+                {
+                    Process.Start(AppDomain.CurrentDomain.BaseDirectory + @"\Help\Converter.html");
+                }
                 Console.WriteLine("input code");
-                Process.Start(AppDomain.CurrentDomain.BaseDirectory + @"\Help\Converter.html");
                 code = Console.ReadLine();
             }
             App app = new App();
