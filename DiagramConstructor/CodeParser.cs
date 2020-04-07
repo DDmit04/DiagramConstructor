@@ -132,35 +132,59 @@ namespace DiagramConstructor
                 } 
                 else
                 {
-                    String copy = nextCodeBlock;
-                    while (copy.Length > 2) {
+                    bool blockIsSimple = codeBlockIsSimple(nodeCode);
+                    while (nodeCode.Length > 2) {
                         Node node = new Node();
-                        nextLineDivider = copy.IndexOf(';');
-                        nodeCodeLine = copy.Substring(0, nextLineDivider + 1);
-                        copy = copy.Replace(nodeCodeLine, "");
+                        nextLineDivider = nodeCode.IndexOf(';');
+                        nodeCodeLine = nodeCode.Substring(0, nextLineDivider + 1);
+                        if (!lineIsSimple(nodeCodeLine))
+                        {
+                            break;
+                        }
+                        nodeCode = nodeCode.Substring(nodeCodeLine.Length);
                         node.nodeText = nodeCodeLine.Replace(";", "");
-                        if (copy.IndexOf("cin>>") == 0)
+                        if (nodeCodeLine.IndexOf("cin>>") == 0)
                         {
                             nodeCodeLine = nodeCodeLine.Replace("cin>>", "Ввод ");
                             nodeCodeLine = nodeCodeLine.Replace("<<endl", "");
+                            node.nodeType = NodeType.INOUTPUT;
 
-                        } else if(copy.IndexOf("cout<<") == 0)
+                        }
+                        else if(nodeCodeLine.IndexOf("cout<<") == 0)
                         {
                             nodeCodeLine = nodeCodeLine.Replace("cout<<", "Вывод ");
                             nodeCodeLine = nodeCodeLine.Replace("<<endl", "");
+                            node.nodeType = NodeType.INOUTPUT;
                         }
                         else
                         {
                             nodeCodeLine = nodeCodeLine.Replace("}", "").Replace("{", "");
+                            node.nodeType = NodeType.COMMON;
                         }
                         node.nodeText = nodeCodeLine.Replace(";", "");
-                        node.nodeType = NodeType.COMMON;
                         resultNodes.Add(node);
                     }
+                    continue;
                 }
                 nodeCode = nodeCode.Replace(nextCodeBlock, "");
             }
             return resultNodes;
+        }
+
+        public bool codeBlockIsSimple(String line)
+        {
+            return line.IndexOf("if(") == -1 
+                && line.IndexOf("for(") == -1
+                && line.IndexOf("while(") == -1 
+                && line.IndexOf("switch(") == -1;
+        }
+
+        public bool lineIsSimple(String line)
+        {
+            return !(line.IndexOf("if(") == 0
+                || line.IndexOf("for(") == 0
+                || line.IndexOf("while(") == 0
+                || line.IndexOf("switch(") == 0);
         }
 
     }

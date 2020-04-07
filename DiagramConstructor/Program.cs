@@ -15,7 +15,7 @@ namespace DiagramConstructor
             String code = "";
             if (test)
             {
-                code = "for(a=0){int b -= 10;a= 10;if(a < 0){int a = 10;}}";
+                code = "cout<<'lul';cout<<'lul';cout<<'lul';";
             }
             else
             {
@@ -29,6 +29,10 @@ namespace DiagramConstructor
                     Process.Start(AppDomain.CurrentDomain.BaseDirectory + @"\Help\Converter.html");
                 }
                 Console.WriteLine("input code");
+                int bufSize = 2048;
+                Stream inStream = Console.OpenStandardInput(bufSize);
+                Console.SetIn(new StreamReader(inStream, Console.InputEncoding, false, bufSize));
+
                 code = Console.ReadLine();
             }
             App app = new App();

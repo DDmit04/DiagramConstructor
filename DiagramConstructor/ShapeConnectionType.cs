@@ -16,6 +16,7 @@ namespace DiagramConstructor
         FROM_BOT_TO_CENTER,
         FROM_RIGHT_TO_CENTER,
         FROM_TOP_TO_CENTER,
-        FROM_RIGHT_TO_LEFT
+        FROM_RIGHT_TO_LEFT,
+        FROM_TOP_TO_BOT
     }
 }
