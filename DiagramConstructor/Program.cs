@@ -15,7 +15,7 @@ namespace DiagramConstructor
             String code = "";
             if (test)
             {
-                code = "while(a=0){int a = 10;int b -= 10;a= 10;}";
+                code = "for(a=0){int b -= 10;a= 10;if(a < 0){int a = 10;}}";
             }
             else
             {

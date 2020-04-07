@@ -25,11 +25,15 @@ namespace DiagramConstructor
         private Master line;
         private Master textField;
         private Master yesNoTextField;
-
-        private Shape pervShape;
+        private Master arrowLeft;
+        private Master arrowRight;
+        private Master littleInvisibleBlock;
 
         private Shape globalLastDropedShape;
-        private Shape globalLastChaneParentShape;
+        private NodeType globalLastDropedShapeType;
+        private Shape globalLastChaineParentShape;
+
+        private ShapeConnectionType connectionTypeForEndShape = ShapeConnectionType.FROM_TOP_TO_RIGHT;
 
         private double coreX = 4.25;
         private double coreY = 11;
@@ -54,6 +58,9 @@ namespace DiagramConstructor
             line = visioStencil.Masters.get_ItemU(@"line");
             textField = visioStencil.Masters.get_ItemU(@"textField");
             yesNoTextField = visioStencil.Masters.get_ItemU(@"yesNo");
+            arrowLeft = visioStencil.Masters.get_ItemU(@"arrowLeft");
+            arrowRight = visioStencil.Masters.get_ItemU(@"arrowRight");
+            littleInvisibleBlock = visioStencil.Masters.get_ItemU(@"LittleInvisibleBlock");
         }
 
         public void buildDiagram()
@@ -61,18 +68,14 @@ namespace DiagramConstructor
             visioApp.Documents.Add("");
             Page visioPage = visioApp.ActivePage;
 
-            globalLastDropedShape = dropShape(begin, null, ShapeConnectionType.USAL, "Начало", coreX, coreY);
-            coreY--;
+            placeBeginShape();
 
             foreach (Node node in codeThree.main)
             {
-                qwe(node, coreX, coreY);
+                buildTree(node, null, coreX, coreY);
             }
 
-            Shape endShape = dropShape(begin, null, ShapeConnectionType.USAL, "Конец", coreX, coreY);
-
-            //INVERTED SHAPES!!!
-            connectShaps(globalLastChaneParentShape, endShape, ShapeConnectionType.OUT_PARENT);
+            placeEndShape(codeThree.main);
 
             String documetsRoot = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             visioApp.ActiveDocument.SaveAs(documetsRoot + @"\result.vsdx");
@@ -80,114 +83,221 @@ namespace DiagramConstructor
             visioStencil.Close();
         }
 
-        public void qwe(Node node, double x, double y)
+        public void placeBeginShape()
         {
-            Master figureMasterToAdd = getFigureMasterByNodeType(node.nodeType);
-            if (node.nodeType == NodeType.IF)
-            {
-            }
-            else if(node.nodeType != NodeType.COMMON && node.nodeType != NodeType.INOUTPUT)
-            {
-                Shape shapeCopy = dropShape(figureMasterToAdd, globalLastDropedShape, ShapeConnectionType.USAL, node.nodeText, x, y);
-                globalLastDropedShape = shapeCopy;
-                if (node.nodeType == NodeType.FOR)
-                { 
-                }
-                else if(node.nodeType == NodeType.WHILE)
-                {
-                    addTextBox("Да", x + 0.38, y - 0.5);
-                    addTextBox("Нет", x + 0.7, y + 0.2);
-                    y -= 0.2;
-                }
-                buldSimpleDiagram(node.childNodes, globalLastDropedShape, x, y - 1);
-                if (globalLastChaneParentShape != null)
-                {
-                    connectShaps(globalLastChaneParentShape, globalLastDropedShape, ShapeConnectionType.OUT_PARENT);
-                }
-                globalLastChaneParentShape = shapeCopy;
-                globalLastDropedShape = null;
-            }
-            else
-            {
-                globalLastDropedShape = dropShape(figureMasterToAdd, globalLastDropedShape, ShapeConnectionType.USAL, node.nodeText, x, y);
-            }
+            globalLastDropedShape = dropShape(begin, null, ShapeConnectionType.FROM_BOT_TO_TOP, "Начало", coreX, coreY);
+            coreY -= 0.95;
         }
 
-        public void buldSimpleDiagram(List<Node> nodes, Shape chainParentShape, double x, double y)
+        public void placeEndShape(List<Node> mainBranch)
         {
-            Page visioPage = visioApp.ActivePage;
-            foreach (Node node in nodes)
+            if (mainBranch[mainBranch.Count - 1].nodeType == NodeType.IF)
             {
-                if (node.nodeType == NodeType.COMMON)
+                connectionTypeForEndShape = ShapeConnectionType.FROM_TOP_TO_CENTER;
+            }
+
+            Shape endShape = dropShape(begin, null, ShapeConnectionType.FROM_BOT_TO_TOP, "Конец", coreX, coreY);
+
+            if (globalLastChaineParentShape == null)
+            {
+                globalLastChaineParentShape = globalLastDropedShape;
+            }
+            connectShapes(globalLastChaineParentShape, endShape, line, connectionTypeForEndShape);
+        }
+
+        public void buildTree(Node node, Shape lastParentShape, double x, double y)
+        {
+            Master figureMasterToAdd = getFigureMasterByNodeType(node.nodeType);
+            //paste figure
+            Shape currentNodeShape = dropShape(figureMasterToAdd, globalLastDropedShape, ShapeConnectionType.FROM_BOT_TO_TOP, node.nodeText, x, y);
+            //set last added shape (to connect with begin and end shapes)
+            globalLastDropedShape = currentNodeShape;
+            if (node.nodeType == NodeType.IF)
+            {
+                addTextYesNo("Да", x - 0.7, y + 0.2);
+                addTextYesNo("Нет", x + 0.7, y + 0.2);
+                Shape lastBranchShape = buildIfElseTreeBranch(node.childIfNodes, currentNodeShape, ShapeConnectionType.FROM_LEFT_TO_TOP, x - 1.2, y - 1);
+                Shape invisibleBlock = dropShape(littleInvisibleBlock, null, ShapeConnectionType.FROM_BOT_TO_CENTER, "", x, y - node.childIfNodes.Count - 1);
+                connectShapes(invisibleBlock, lastBranchShape, line, ShapeConnectionType.FROM_BOT_TO_CENTER);
+                if (node.childElseNodes.Count != 0)
                 {
-                    Master figureMasterToAdd = getFigureMasterByNodeType(node.nodeType);
-                    globalLastDropedShape = dropShape(figureMasterToAdd, globalLastDropedShape, ShapeConnectionType.USAL, node.nodeText, x, y);
+                    lastBranchShape = buildIfElseTreeBranch(node.childElseNodes, currentNodeShape, ShapeConnectionType.FROM_RIGHT_TO_TOP, x + 1.2, y - 1);
+                    connectShapes(invisibleBlock, lastBranchShape, line, ShapeConnectionType.FROM_BOT_TO_CENTER);
                 }
                 else
                 {
-                    qwe(node, x, y);
+                    connectShapes(invisibleBlock, currentNodeShape, line, ShapeConnectionType.FROM_RIGHT_TO_CENTER);
+                }
+                connectShapes(invisibleBlock, currentNodeShape, line, ShapeConnectionType.FROM_RIGHT_TO_CENTER);
+                globalLastDropedShape = invisibleBlock;
+            }
+            else if(node.nodeType != NodeType.COMMON && node.nodeType != NodeType.INOUTPUT)
+            {
+                if (node.nodeType == NodeType.WHILE)
+                {
+                    addTextYesNo("Да", x + 0.38, y - 0.5);
+                    addTextYesNo("Нет", x + 0.7, y + 0.2);
+                    y -= 0.2;
+                    buldTreeBranch(node, currentNodeShape, ShapeConnectionType.FROM_RIGHT_TO_LEFT, x, y - 1);
+                }
+                else
+                {
+                    buldTreeBranch(node, currentNodeShape, ShapeConnectionType.FROM_BOT_TO_LEFT, x, y - 1);
+                }
+                //connect last droped shape (in branch if it exists)
+                if (lastParentShape != null)
+                {
+                    //TODO may be must return last droped shape from branch
+                    connectShapes(lastParentShape, globalLastDropedShape, line, ShapeConnectionType.FROM_TOP_TO_RIGHT);
+                }
+                //set last added shape as new code branch parent (when last brunch is ended by 'buldTreeBranch')
+                globalLastChaineParentShape = currentNodeShape;
+                //do not connect shapes from different branches
+            }
+        }
+
+        public Shape buildIfElseTreeBranch(List<Node> nodes, Shape chainParentShape, ShapeConnectionType ifElseConnectionType, double x, double y)
+        {
+            Shape lastBranchShape = null;
+            for(int i = 0; i < nodes.Count; i++)
+            {
+                Node node = nodes[i];
+                if (node.nodeType == NodeType.COMMON || node.nodeType == NodeType.INOUTPUT)
+                {
+                    Master figureMasterToAdd = getFigureMasterByNodeType(node.nodeType);
+                    if (i == 0)
+                    {
+                        //connect with begin shape
+                        lastBranchShape = dropShape(figureMasterToAdd, null, ShapeConnectionType.FROM_BOT_TO_TOP, node.nodeText, x, y);
+                        connectShapes(lastBranchShape, chainParentShape, line, ifElseConnectionType);
+                    }
+                    else
+                    {
+                        lastBranchShape = dropShape(figureMasterToAdd, chainParentShape, ShapeConnectionType.FROM_BOT_TO_TOP, node.nodeText, x, y);
+                    }
+                    globalLastDropedShapeType = node.nodeType;
+                }
+                else
+                {
+                    buildTree(node, chainParentShape, x, y);
                     y -= node.childNodes.Count;
+                }
+                y--;
+                if (y < coreY)
+                {
+                    coreY = y;
+                }
+            }
+            return lastBranchShape;
+        }
+
+        public Shape buldTreeBranch(Node node, Shape chainParentShape, ShapeConnectionType lastShapeConnectionType, double x, double y)
+        {
+            Shape lastBranchShape = chainParentShape;
+            Page visioPage = visioApp.ActivePage;
+            foreach (Node currentNode in node.childNodes)
+            {
+                if (currentNode.nodeType == NodeType.COMMON || currentNode.nodeType == NodeType.INOUTPUT)
+                {
+                    Master figureMasterToAdd = getFigureMasterByNodeType(currentNode.nodeType);
+                    lastBranchShape = dropShape(figureMasterToAdd, lastBranchShape, ShapeConnectionType.FROM_BOT_TO_TOP, currentNode.nodeText, x, y);
+                    globalLastDropedShapeType = currentNode.nodeType;
+                }
+                else
+                {
+                    buildTree(currentNode, chainParentShape, x, y);
+                    y -= Math.Max(currentNode.childNodes.Count, Math.Max(currentNode.childIfNodes.Count, currentNode.childElseNodes.Count));
+                    y -= 0.7;
                 }
                 y--;
             }
             if (chainParentShape != null)
             {
-                connectShaps(chainParentShape, globalLastDropedShape, ShapeConnectionType.BACK_PARENT);
+                if(node.nodeType != NodeType.COMMON 
+                    && node.nodeType != NodeType.INOUTPUT 
+                    && globalLastDropedShapeType != NodeType.COMMON)
+                {
+                    lastShapeConnectionType = ShapeConnectionType.FROM_RIGHT_TO_LEFT;
+                }
+                connectShapes(chainParentShape, lastBranchShape, arrowLeft, lastShapeConnectionType);
             }
             if (y < coreY)
             {
                 coreY = y;
             }
+            return lastBranchShape;
         }
 
-    public Shape dropShape(Master figure, Shape prevShape, ShapeConnectionType connectionType, String text, double x, double y)
+        public Shape dropShape(Master figure, Shape prevShape, ShapeConnectionType connectionType, String text, double x, double y)
         {
             Page visioPage = visioApp.ActivePage;
             Shape shapeToDrop = visioPage.Drop(figure, x, y);
             shapeToDrop.Text = text;
             if (prevShape != null)
             {
-                connectShaps(shapeToDrop, prevShape, connectionType);
+                connectShapes(shapeToDrop, prevShape, line, connectionType);
             }
             return shapeToDrop;
         }
 
-    public Shape addTextBox(String text, double x, double y)
+        public Shape addTextYesNo(String text, double x, double y)
         {
             Page visioPage = visioApp.ActivePage;
-            Shape shape = dropShape(yesNoTextField, null, ShapeConnectionType.USAL, text, x, y);
+            Shape shape = dropShape(yesNoTextField, null, ShapeConnectionType.FROM_BOT_TO_TOP, text, x, y);
             return shape;
         }
 
-    public void connectShaps(Shape shapeFrom, Shape shapeTo, ShapeConnectionType connectionType)
+        public Shape addTextField(String text, double x, double y)
+        {
+            Page visioPage = visioApp.ActivePage;
+            Shape shape = dropShape(textField, null, ShapeConnectionType.FROM_BOT_TO_TOP, text, x, y);
+            return shape;
+        }
+
+        public void connectShapes(Shape shapeFrom, Shape shapeTo, Master connectorMaster, ShapeConnectionType connectionType)
         {
             VisCellIndices conectionToType = VisCellIndices.visAlignTop;
             VisCellIndices conectionFromType = VisCellIndices.visAlignBottom;
             switch (connectionType)
             {
-                case ShapeConnectionType.USAL:
+                case ShapeConnectionType.FROM_BOT_TO_TOP:
                     conectionToType = VisCellIndices.visAlignTop;
                     conectionFromType = VisCellIndices.visAlignBottom;
                     break;
-                case ShapeConnectionType.IF_BRANCH:
+                case ShapeConnectionType.FROM_LEFT_TO_TOP:
                     conectionToType = VisCellIndices.visAlignTop;
                     conectionFromType = VisCellIndices.visAlignLeft;
                     break;
-                case ShapeConnectionType.ELSE_BRANCH:
+                case ShapeConnectionType.FROM_RIGHT_TO_TOP:
                     conectionToType = VisCellIndices.visAlignTop;
                     conectionFromType = VisCellIndices.visAlignRight;
                     break;
-                case ShapeConnectionType.BACK_PARENT:
+                case ShapeConnectionType.FROM_BOT_TO_LEFT:
                     conectionToType = VisCellIndices.visAlignLeft;
                     conectionFromType = VisCellIndices.visAlignBottom;
                     break;
-                //INVERTED ALIGNS!!!
-                case ShapeConnectionType.OUT_PARENT:
+                case ShapeConnectionType.FROM_TOP_TO_RIGHT:
                     conectionToType = VisCellIndices.visAlignRight;
                     conectionFromType = VisCellIndices.visAlignTop;
                     break;
+                case ShapeConnectionType.FROM_BOT_TO_CENTER:
+                    conectionToType = VisCellIndices.visAlignCenter;
+                    conectionFromType = VisCellIndices.visAlignBottom;
+                    break;
+                case ShapeConnectionType.FROM_RIGHT_TO_CENTER:
+                    conectionToType = VisCellIndices.visAlignCenter;
+                    conectionFromType = VisCellIndices.visAlignRight;
+                    break;
+                case ShapeConnectionType.FROM_TOP_TO_CENTER:
+                    conectionToType = VisCellIndices.visAlignCenter;
+                    conectionFromType = VisCellIndices.visAlignTop;
+                    break;
+                case ShapeConnectionType.FROM_RIGHT_TO_LEFT:
+                    conectionToType = VisCellIndices.visAlignLeft;
+                    conectionFromType = VisCellIndices.visAlignRight;
+                    break;
             }
-            ConnectWithDynamicGlueAndConnector(shapeFrom, shapeTo, conectionToType, conectionFromType);
+            ConnectWithDynamicGlueAndConnector(shapeFrom, shapeTo, connectorMaster, conectionToType, conectionFromType);
         }
 
     public Master getFigureMasterByNodeType(NodeType nodeType)
@@ -214,14 +324,14 @@ namespace DiagramConstructor
             return resultFigure;
         }
 
-        private void ConnectWithDynamicGlueAndConnector(Shape shapeFrom, Shape shapeTo, VisCellIndices fromPoint, VisCellIndices toPoint)
+        private void ConnectWithDynamicGlueAndConnector(Shape shapeFrom, Shape shapeTo, Master connectorMaster, VisCellIndices fromPoint, VisCellIndices toPoint)
         {
             Cell beginXCell;
             Cell endXCell;
             Shape connector;
 
             Page visioPage = visioApp.ActivePage;
-            connector = visioPage.Drop(line, 4, 4);
+            connector = visioPage.Drop(connectorMaster, 4.25, 11);
 
             beginXCell = connector.get_CellsSRC(
                 (short)VisSectionIndices.visSectionObject,
