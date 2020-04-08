@@ -19,6 +19,7 @@ namespace DiagramConstructor
         public CodeThree ParseCode()
         {
             // TO DO methods(global and in code) location
+            //cout« cin»
             codeThree.main = parseNode(codeToParse);
             return codeThree;
         }
