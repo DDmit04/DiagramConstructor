@@ -15,7 +15,7 @@ namespace DiagramConstructor
             String code = "";
             if (test)
             {
-                code = "for(awd){for(AWd){if(awd){awd;}else{awd;}awd;}}";
+                code = "a=10;lul(awd);b=5;";
             }
             else
             {

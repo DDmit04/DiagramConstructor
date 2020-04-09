@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace DiagramConstructor
@@ -9,7 +10,8 @@ namespace DiagramConstructor
     class CodeParser
     {
         private String codeToParse;
-        private CodeThree codeThree = new CodeThree();
+
+        private List<Node> methodNodes;
 
         public CodeParser(String codeToParse)
         {
@@ -19,14 +21,23 @@ namespace DiagramConstructor
         public CodeThree ParseCode()
         {
             // TO DO methods(global and in code) location
-            //cout« cin»
-            codeThree.main = parseNode(codeToParse);
+            // method start - (\w*)\((\w*)\)(\s*)(\{)
+            if (codeToParse.IndexOf("main(") == 0)
+            {
+                codeToParse = codeToParse.Substring(codeToParse.IndexOf('{') + 1);
+                codeToParse = codeToParse.Substring(0, codeToParse.Length - 1);
+            }
+            methodNodes = parseNode(codeToParse);
+            CodeThree codeThree = new CodeThree("main()", methodNodes);
             return codeThree;
         }
-
+        
         public bool nextCodeIsSimple(String code)
         {
-            bool langStateIsNearToBegin = code.IndexOf("if(") == 1 || code.IndexOf("while(") == 1 || code.IndexOf("for(") == 1 || code.IndexOf("else{") == 1;
+            bool langStateIsNearToBegin = code.IndexOf("if(") == 1 
+                || code.IndexOf("while(") == 1 
+                || code.IndexOf("for(") == 1 
+                || code.IndexOf("else{") == 1;
             bool codeIsSurroundedByMarcks = code[0] == '{' && code[code.Length - 1] == '}';
             return codeIsSurroundedByMarcks && langStateIsNearToBegin;
         }
@@ -138,18 +149,26 @@ namespace DiagramConstructor
                         {
                             break;
                         }
+                        if(nodeCodeLine.IndexOf('{') == 0)
+                        {
+                            nodeCodeLine = nodeCodeLine.Remove(0, 1);
+                        }
                         nodeCode = nodeCode.Substring(nodeCodeLine.Length);
                         node.nodeText = nodeCodeLine.Replace(";", "");
-                        if (nodeCodeLine.IndexOf("cin>>") == 0)
+                        if (nodeCodeLine.IndexOf("cin>>") == 0 || nodeCodeLine.IndexOf("cin»") == 0)
                         {
                             nodeCodeLine = nodeCodeLine.Replace("cin>>", "Ввод ");
+                            nodeCodeLine = nodeCodeLine.Replace("cin»", "Ввод ");
+                            nodeCodeLine = nodeCodeLine.Replace("«endl", "");
                             nodeCodeLine = nodeCodeLine.Replace("<<endl", "");
                             node.nodeType = NodeType.INOUTPUT;
 
                         }
-                        else if(nodeCodeLine.IndexOf("cout<<") == 0)
+                        else if(nodeCodeLine.IndexOf("cout<<") == 0 || nodeCodeLine.IndexOf("cout«") == 0)
                         {
                             nodeCodeLine = nodeCodeLine.Replace("cout<<", "Вывод ");
+                            nodeCodeLine = nodeCodeLine.Replace("cout«", "Ввод ");
+                            nodeCodeLine = nodeCodeLine.Replace("«endl", "");
                             nodeCodeLine = nodeCodeLine.Replace("<<endl", "");
                             node.nodeType = NodeType.INOUTPUT;
                         }
@@ -158,6 +177,14 @@ namespace DiagramConstructor
                             nodeCodeLine = nodeCodeLine.Replace("}", "").Replace("{", "");
                             node.nodeType = NodeType.COMMON;
                         }
+
+                        Regex regex = new Regex("(\\w*)\\((\\w*)\\)");
+                        Regex regex1 = new Regex("(\\w*)(\\=)(\\w*)\\((\\w*)\\)");
+                        if (regex.IsMatch(nodeCodeLine))
+                        {
+                            node.nodeType = NodeType.PROGRAM;
+                        }
+
                         node.nodeText = nodeCodeLine.Replace(";", "");
                         resultNodes.Add(node);
                     }

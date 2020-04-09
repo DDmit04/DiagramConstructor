@@ -8,7 +8,13 @@ namespace DiagramConstructor
 {
     class CodeThree
     {
-        public List<Node> main { get; set; }
-        public List<Node> otherMethods { get; set; }
+        public String methodSignature { get; }
+        public List<Node> methodNodes { get; }
+
+        public CodeThree(String methodSignature, List<Node> methodNodes)
+        {
+            this.methodSignature = methodSignature;
+            this.methodNodes = methodNodes;
+        }
     }
 }

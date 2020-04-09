@@ -13,6 +13,7 @@ namespace DiagramConstructor
         IF,
         ELSE,
         FOR,
-        WHILE
+        WHILE,
+        PROGRAM
     }
 }

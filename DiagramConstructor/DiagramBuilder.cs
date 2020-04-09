@@ -1,11 +1,6 @@
 ﻿using Microsoft.Office.Interop.Visio;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Visio = Microsoft.Office.Interop.Visio;
 
 namespace DiagramConstructor
 {
@@ -68,13 +63,13 @@ namespace DiagramConstructor
 
             placeBeginShape();
 
-            for (int i = 0; i < codeThree.main.Count; i++)
+            for (int i = 0; i < codeThree.methodNodes.Count; i++)
             {
-                Node node = codeThree.main[i];
+                Node node = codeThree.methodNodes[i];
                 globalLastDropedShapeV2 = buildTreeV2(node, null, coreX, coreY);
             }
 
-            placeEndShape(codeThree.main);
+            placeEndShape(codeThree.methodNodes);
 
             String documetsRoot = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             visioApp.ActiveDocument.SaveAs(documetsRoot + @"\result.vsdx");
@@ -91,7 +86,7 @@ namespace DiagramConstructor
         public void placeEndShape(List<Node> mainBranch)
         {
             ShapeWrapper endShape = dropShapeV2(begin, "Конец", coreX, coreY);
-            ShapeConnectionType shapeConnection = ShapeConnectionType.FROM_BOT_TO_TOP;
+            ShapeConnectionType shapeConnection = ShapeConnectionType.FROM_TOP_TO_BOT;
             if (globalLastDropedShapeV2.shapeType != NodeType.COMMON && globalLastDropedShapeV2.shapeType != NodeType.INOUTPUT)
             {
                 shapeConnection = ShapeConnectionType.FROM_TOP_TO_RIGHT;
@@ -115,7 +110,8 @@ namespace DiagramConstructor
                 {
                     shapeConnectionType = ShapeConnectionType.FROM_RIGHT_TO_TOP;
                 }
-                else if (globalShapeType == NodeType.COMMON && currentNodeShape.shapeType == NodeType.COMMON)
+                else if ((globalShapeType == NodeType.COMMON || globalShapeType == NodeType.INOUTPUT || globalShapeType == NodeType.PROGRAM) 
+                    && (currentNodeShape.shapeType == NodeType.COMMON || currentNodeShape.shapeType == NodeType.INOUTPUT || currentNodeShape.shapeType == NodeType.PROGRAM))
                 {
                     shapeConnectionType = ShapeConnectionType.FROM_TOP_TO_BOT;
                 }
@@ -371,6 +367,9 @@ namespace DiagramConstructor
                     break;
                  case NodeType.FOR:
                     resultFigure = forState;
+                    break;
+                case NodeType.PROGRAM:
+                    resultFigure = program;
                     break;
             }
             return resultFigure;

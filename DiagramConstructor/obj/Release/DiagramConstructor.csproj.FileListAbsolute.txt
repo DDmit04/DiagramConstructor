@@ -6,3 +6,5 @@ C:\Users\danya\source\repos\DiagramConstructor\DiagramConstructor\obj\Release\Di
 C:\Users\danya\source\repos\DiagramConstructor\DiagramConstructor\obj\Release\DiagramConstructor.csproj.CoreCompileInputs.cache
 C:\Users\danya\source\repos\DiagramConstructor\DiagramConstructor\obj\Release\DiagramConstructor.exe
 C:\Users\danya\source\repos\DiagramConstructor\DiagramConstructor\obj\Release\DiagramConstructor.pdb
+C:\Users\danya\source\repos\DiagramConstructor\DiagramConstructor\bin\Release\Help\Shapes.vssx
+C:\Users\danya\source\repos\DiagramConstructor\DiagramConstructor\bin\Release\Help\Converter.html
