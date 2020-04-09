@@ -29,17 +29,10 @@ namespace DiagramConstructor
         private Master arrowRight;
         private Master littleInvisibleBlock;
 
-        private Shape globalLastDropedShape;
-        private NodeType globalLastDropedShapeType;
-        private Shape globalLastChaineParentShape;
-
         private ShapeWrapper globalLastDropedShapeV2;
-        private bool mainNodesConnected = false;
 
         private double coreX = 4.25;
         private double coreY = 11;
-
-        private ShapeConnectionType connectionTypeForEndShape;
 
         private CodeThree codeThree;
 
@@ -79,7 +72,6 @@ namespace DiagramConstructor
             {
                 Node node = codeThree.main[i];
                 globalLastDropedShapeV2 = buildTreeV2(node, null, coreX, coreY);
-                mainNodesConnected = false;
             }
 
             placeEndShape(codeThree.main);
@@ -92,44 +84,36 @@ namespace DiagramConstructor
 
         public void placeBeginShape()
         {
-            globalLastDropedShapeV2 = dropShapeV2(begin, "Начало", coreX, coreY);
+            dropShapeV2(begin, "Начало", coreX, coreY);
             coreY -= 0.95;
         }
 
         public void placeEndShape(List<Node> mainBranch)
         {
-            if (mainBranch[mainBranch.Count - 1].nodeType == NodeType.IF)
-            {
-                connectionTypeForEndShape = ShapeConnectionType.FROM_TOP_TO_CENTER;
-            }
-
-            //connect end shape manualy
             ShapeWrapper endShape = dropShapeV2(begin, "Конец", coreX, coreY);
-
-            if (globalLastChaineParentShape == null)
+            ShapeConnectionType shapeConnection = ShapeConnectionType.FROM_BOT_TO_TOP;
+            if (globalLastDropedShapeV2.shapeType != NodeType.COMMON && globalLastDropedShapeV2.shapeType != NodeType.INOUTPUT)
             {
-                globalLastChaineParentShape = globalLastDropedShape;
-                connectionTypeForEndShape = ShapeConnectionType.FROM_TOP_TO_BOT;
+                shapeConnection = ShapeConnectionType.FROM_TOP_TO_RIGHT;
             }
-            //connectShapes(globalLastChaineParentShape, endShape, line, connectionTypeForEndShape);
+            connectShapes(globalLastDropedShapeV2.shape, endShape.shape, line, shapeConnection);
         }
 
         public ShapeWrapper buildTreeV2(Node node, ShapeWrapper lastParentShape, double x, double y)
         {
             Master figureMasterToAdd = getFigureMasterByNodeType(node.nodeType);
             ShapeWrapper currentNodeShape = dropShapeV2(figureMasterToAdd, node, x, y);
-            if (lastParentShape != null && (lastParentShape.shapeType == NodeType.COMMON || lastParentShape.shapeType == NodeType.INOUTPUT))
+            if (globalLastDropedShapeV2 != null)
             {
-                connectShapes(currentNodeShape.shape, lastParentShape.shape, line, ShapeConnectionType.FROM_BOT_TO_TOP);
-            }
-            if(globalLastDropedShapeV2 != null && !mainNodesConnected)
-            {
-                mainNodesConnected = true;
-                ShapeConnectionType shapeConnectionType = ShapeConnectionType.FROM_TOP_TO_BOT;
+                ShapeConnectionType shapeConnectionType = ShapeConnectionType.FROM_TOP_TO_RIGHT;
                 NodeType globalShapeType = globalLastDropedShapeV2.shapeType;
                 if ((globalShapeType == NodeType.FOR || globalShapeType == NodeType.WHILE) && currentNodeShape.shapeType == NodeType.COMMON)
                 {
                     shapeConnectionType = ShapeConnectionType.FROM_TOP_TO_RIGHT;
+                }
+                else if((globalShapeType == NodeType.FOR || globalShapeType == NodeType.WHILE) && (currentNodeShape.shapeType == NodeType.FOR || currentNodeShape.shapeType == NodeType.WHILE))
+                {
+                    shapeConnectionType = ShapeConnectionType.FROM_RIGHT_TO_TOP;
                 }
                 else if (globalShapeType == NodeType.COMMON && currentNodeShape.shapeType == NodeType.COMMON)
                 {
@@ -144,7 +128,8 @@ namespace DiagramConstructor
                 addTextYesNo("Да", x - 0.7, y + 1 + 0.2);
                 addTextYesNo("Нет", x + 0.7, y + 1 + 0.2);
                 lastBranchShape = buildIfElseTreeBranchV2(node.childIfNodes, currentNodeShape, ShapeConnectionType.FROM_LEFT_TO_TOP, x - 1.2, y);
-                ShapeWrapper invisibleBlock = dropShapeV2(littleInvisibleBlock, "", x, coreY);
+                int statementHeight = Math.Max(node.childIfNodes.Count, node.childElseNodes.Count);
+                ShapeWrapper invisibleBlock = dropShapeV2(littleInvisibleBlock, "", x, coreY + 1 - statementHeight);
                 if(lastBranchShape.shapeType == NodeType.COMMON || lastBranchShape.shapeType == NodeType.INOUTPUT)
                 {
                     connectShapes(invisibleBlock.shape, lastBranchShape.shape, line, ShapeConnectionType.FROM_BOT_TO_CENTER);
@@ -171,30 +156,31 @@ namespace DiagramConstructor
                 addTextYesNo("Нет", x + 0.7, y + 1 + 0.2);
                 y -= 0.2;
                 lastBranchShape = currentNodeShape;
-                buildTreeBranchV2(node, currentNodeShape, ShapeConnectionType.FROM_RIGHT_TO_LEFT, x, y);
+                buildTreeBranchV2(node, currentNodeShape, x, y);
                 coreY -= 0.2;
             }
             else if(node.nodeType == NodeType.FOR)
             {
                 lastBranchShape = currentNodeShape;
-                buildTreeBranchV2(node, currentNodeShape, ShapeConnectionType.FROM_BOT_TO_LEFT, x, y);
+                buildTreeBranchV2(node, currentNodeShape, x, y);
                 coreY -= 0.2;
             }
             if (y < coreY)
             {
                 coreY = y;
             }
+            globalLastDropedShapeV2 = lastBranchShape;
             return lastBranchShape;
         }
 
-        public ShapeWrapper buildTreeBranchV2(Node node, ShapeWrapper chainParentShape, ShapeConnectionType lastShapeConnectionType, double x, double y)
+        public ShapeWrapper buildTreeBranchV2(Node node, ShapeWrapper chainParentShape, double x, double y)
         {
             ShapeWrapper lastBranchShape = null;
             ShapeWrapper prevShape = chainParentShape;
             Page visioPage = visioApp.ActivePage;
             if(node.childNodes.Count == 0)
             {
-                dropShapeV2(getFigureMasterByNodeType(node.nodeType), node, x, y);
+                lastBranchShape = buildTreeV2(node, chainParentShape, x, y);
                 y--;
             }
             for (int i = 0; i < node.childNodes.Count; i++)
@@ -203,9 +189,10 @@ namespace DiagramConstructor
                 Node currentNode = node.childNodes[i];
                 if (currentNode.nodeType == NodeType.COMMON || currentNode.nodeType == NodeType.INOUTPUT)
                 {
-                    Master figureMasterToAdd = getFigureMasterByNodeType(currentNode.nodeType);
-                    lastBranchShape = dropShapeV2(figureMasterToAdd, currentNode, x, y);
-                    connectShapes(prevShape.shape, lastBranchShape.shape, line, ShapeConnectionType.FROM_TOP_TO_BOT);
+                    //Master figureMasterToAdd = getFigureMasterByNodeType(currentNode.nodeType);
+                    //lastBranchShape = dropShapeV2(figureMasterToAdd, currentNode, x, y);
+                    //connectShapes(prevShape.shape, lastBranchShape.shape, line, ShapeConnectionType.FROM_TOP_TO_BOT);
+                    lastBranchShape = buildTreeV2(currentNode, chainParentShape, x, y);
                 }
                 else
                 {
@@ -257,7 +244,7 @@ namespace DiagramConstructor
                     }
                     else
                     {
-                        lastBranchShape = dropShapeV2(figureMasterToAdd, node, x, y);
+                        lastBranchShape = buildTreeV2(node, chainParentShape, x, y);
                     }
                 }
                 else
@@ -269,6 +256,10 @@ namespace DiagramConstructor
                 if (y < coreY)
                 {
                     coreY = y;
+                } 
+                else
+                {
+                    y = coreY;
                 }
             }
             return lastBranchShape;

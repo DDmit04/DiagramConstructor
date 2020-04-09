@@ -80,10 +80,6 @@ namespace DiagramConstructor
             while (nodeCode.Length > 2) {
                 Node newNode = new Node();
                 nextCodeBlock = getNextCodeBlock(nodeCode);
-                //if(nextCodeBlock == "")
-                //{
-                //    nextCodeBlock = nodeCode;
-                //}
                 if (nextCodeBlock.IndexOf("if(") == 0)
                 {
                     nextLineDivider = nextCodeBlock.IndexOf('{');
