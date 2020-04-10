@@ -15,7 +15,7 @@ namespace DiagramConstructor
             String code = "";
             if (test)
             {
-                code = "for(adwaw){555;666;while(awdwad){777;}}";
+                code = "for(awdaw){for(awdawd){if(awdad){awdaw;}else{awdawd;}awdadw;}awdawd;}";
             }
             else
             {

@@ -17,5 +17,10 @@ namespace DiagramConstructor
         public Shape shape { get; }
         public NodeType shapeType {get;}
 
+        public bool isCommonShape()
+        {
+            return this.shapeType == NodeType.COMMON || this.shapeType == NodeType.INOUTPUT || this.shapeType == NodeType.PROGRAM;
+        }
+
     }
 }

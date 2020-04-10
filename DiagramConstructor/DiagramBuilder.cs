@@ -26,14 +26,17 @@ namespace DiagramConstructor
 
         private ShapeWrapper globalLastDropedShapeV2;
 
-        private double coreX = 4.25;
+        private double startX = 2.25;
+        private double coreX = 2.25;
+
+        private double startY = 11;
         private double coreY = 11;
 
-        private CodeThree codeThree;
+        private List<Method> codeThree;
 
         public NodeType ShapeConn { get; private set; }
 
-        public DiagramBuilder(CodeThree codeThree)
+        public DiagramBuilder(List<Method> codeThree)
         {
             this.codeThree = codeThree;
             visioStencil = visioApp.Documents.OpenEx(
@@ -61,15 +64,23 @@ namespace DiagramConstructor
             visioApp.Documents.Add("");
             Page visioPage = visioApp.ActivePage;
 
-            placeBeginShape();
-
-            for (int i = 0; i < codeThree.methodNodes.Count; i++)
+            foreach (Method method in codeThree)
             {
-                Node node = codeThree.methodNodes[i];
-                globalLastDropedShapeV2 = buildTreeV2(node, null, coreX, coreY);
-            }
 
-            placeEndShape(codeThree.methodNodes);
+                placeBeginShape();
+
+                for (int i = 0; i < method.methodNodes.Count; i++)
+                {
+                    Node node = method.methodNodes[i];
+                    globalLastDropedShapeV2 = buildTreeV2(node, null, coreX, coreY);
+                }
+
+                placeEndShape(method.methodNodes);
+
+                globalLastDropedShapeV2 = null;
+                coreX += 5;
+                coreY = startY;
+            }
 
             String documetsRoot = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             visioApp.ActiveDocument.SaveAs(documetsRoot + @"\result.vsdx");
@@ -86,11 +97,7 @@ namespace DiagramConstructor
         public void placeEndShape(List<Node> mainBranch)
         {
             ShapeWrapper endShape = dropShapeV2(begin, "Конец", coreX, coreY);
-            ShapeConnectionType shapeConnection = ShapeConnectionType.FROM_TOP_TO_BOT;
-            if (globalLastDropedShapeV2.shapeType != NodeType.COMMON && globalLastDropedShapeV2.shapeType != NodeType.INOUTPUT)
-            {
-                shapeConnection = ShapeConnectionType.FROM_TOP_TO_RIGHT;
-            }
+            ShapeConnectionType shapeConnection = defineConnectionType(globalLastDropedShapeV2, endShape);
             connectShapes(globalLastDropedShapeV2.shape, endShape.shape, line, shapeConnection);
         }
 
@@ -100,59 +107,21 @@ namespace DiagramConstructor
             ShapeWrapper currentNodeShape = dropShapeV2(figureMasterToAdd, node, x, y);
             if (globalLastDropedShapeV2 != null)
             {
-                ShapeConnectionType shapeConnectionType = ShapeConnectionType.FROM_TOP_TO_RIGHT;
-                NodeType globalShapeType = globalLastDropedShapeV2.shapeType;
-                if ((globalShapeType == NodeType.FOR || globalShapeType == NodeType.WHILE) && currentNodeShape.shapeType == NodeType.COMMON)
-                {
-                    shapeConnectionType = ShapeConnectionType.FROM_TOP_TO_RIGHT;
-                }
-                else if((globalShapeType == NodeType.FOR || globalShapeType == NodeType.WHILE) && (currentNodeShape.shapeType == NodeType.FOR || currentNodeShape.shapeType == NodeType.WHILE))
-                {
-                    shapeConnectionType = ShapeConnectionType.FROM_RIGHT_TO_TOP;
-                }
-                else if ((globalShapeType == NodeType.COMMON || globalShapeType == NodeType.INOUTPUT || globalShapeType == NodeType.PROGRAM) 
-                    && (currentNodeShape.shapeType == NodeType.COMMON || currentNodeShape.shapeType == NodeType.INOUTPUT || currentNodeShape.shapeType == NodeType.PROGRAM))
-                {
-                    shapeConnectionType = ShapeConnectionType.FROM_TOP_TO_BOT;
-                }
+                ShapeConnectionType shapeConnectionType = defineConnectionType(globalLastDropedShapeV2, currentNodeShape);
                 connectShapes(globalLastDropedShapeV2.shape, currentNodeShape.shape, line, shapeConnectionType);
             }
             y--;
             ShapeWrapper lastBranchShape = currentNodeShape;
             if (node.nodeType == NodeType.IF)
             {
-                addTextYesNo("Да", x - 0.7, y + 1 + 0.2);
-                addTextYesNo("Нет", x + 0.7, y + 1 + 0.2);
-                lastBranchShape = buildIfElseTreeBranchV2(node.childIfNodes, currentNodeShape, ShapeConnectionType.FROM_LEFT_TO_TOP, x - 1.2, y);
-                int statementHeight = Math.Max(node.childIfNodes.Count, node.childElseNodes.Count);
-                ShapeWrapper invisibleBlock = dropShapeV2(littleInvisibleBlock, "", x, coreY + 1 - statementHeight);
-                if(lastBranchShape.shapeType == NodeType.COMMON || lastBranchShape.shapeType == NodeType.INOUTPUT)
-                {
-                    connectShapes(invisibleBlock.shape, lastBranchShape.shape, line, ShapeConnectionType.FROM_BOT_TO_CENTER);
-                }
-                else
-                {
-                    connectShapes(invisibleBlock.shape, lastBranchShape.shape, line, ShapeConnectionType.FROM_RIGHT_TO_CENTER);
-                }
-                if (node.childElseNodes.Count != 0)
-                {
-                    lastBranchShape = buildIfElseTreeBranchV2(node.childElseNodes, currentNodeShape, ShapeConnectionType.FROM_RIGHT_TO_TOP, x + 1.2, y);
-                    connectShapes(invisibleBlock.shape, lastBranchShape.shape, line, ShapeConnectionType.FROM_BOT_TO_CENTER);
-                }
-                else
-                {
-                    connectShapes(invisibleBlock.shape, currentNodeShape.shape, line, ShapeConnectionType.FROM_RIGHT_TO_CENTER);
-                }
-                lastBranchShape = invisibleBlock;
+                lastBranchShape = startIfElseBranch(node, currentNodeShape, x, y);
                 coreY -= 0.5;
             } 
             else if (node.nodeType == NodeType.WHILE)
             {
-                addTextYesNo("Да", x + 0.38, y + 1 - 0.5);
-                addTextYesNo("Нет", x + 0.7, y + 1 + 0.2);
                 y -= 0.2;
                 lastBranchShape = currentNodeShape;
-                buildTreeBranchV2(node, currentNodeShape, x, y);
+                startWhileBranch(node, currentNodeShape, x, y);
                 coreY -= 0.2;
             }
             else if(node.nodeType == NodeType.FOR)
@@ -169,6 +138,47 @@ namespace DiagramConstructor
             return lastBranchShape;
         }
 
+        public ShapeWrapper startWhileBranch(Node node, ShapeWrapper currentNodeShape, double x, double y)
+        {
+            addTextYesNo("Да", x + 0.38, y + 1 - 0.5);
+            addTextYesNo("Нет", x + 0.7, y + 1 + 0.2);
+            y -= 0.2;
+            ShapeWrapper lastBranchShape = buildTreeBranchV2(node, currentNodeShape, x, y);
+            return lastBranchShape;
+        }
+
+        public ShapeWrapper startIfElseBranch(Node node, ShapeWrapper currentNodeShape, double x, double y)
+        {
+            addTextYesNo("Да", x - 0.7, y + 1 + 0.2);
+            addTextYesNo("Нет", x + 0.7, y + 1 + 0.2);
+
+            ShapeWrapper lastBranchShape = buildIfElseTreeBranchV2(node.childIfNodes, currentNodeShape, ShapeConnectionType.FROM_LEFT_TO_TOP, x - 1.2, y);
+
+            int statementHeight = Math.Max(node.childIfNodes.Count, node.childElseNodes.Count);
+
+            ShapeWrapper invisibleBlock = dropShapeV2(littleInvisibleBlock, "", x, coreY + 1 - statementHeight);
+
+            if (lastBranchShape.isCommonShape())
+            {
+                connectShapes(invisibleBlock.shape, lastBranchShape.shape, line, ShapeConnectionType.FROM_BOT_TO_CENTER);
+            }
+            else
+            {
+                connectShapes(invisibleBlock.shape, lastBranchShape.shape, line, ShapeConnectionType.FROM_RIGHT_TO_CENTER);
+            }
+
+            if (node.childElseNodes.Count != 0)
+            {
+                lastBranchShape = buildIfElseTreeBranchV2(node.childElseNodes, currentNodeShape, ShapeConnectionType.FROM_RIGHT_TO_TOP, x + 1.2, y);
+                connectShapes(invisibleBlock.shape, lastBranchShape.shape, line, ShapeConnectionType.FROM_BOT_TO_CENTER);
+            }
+            else
+            {
+                connectShapes(invisibleBlock.shape, currentNodeShape.shape, line, ShapeConnectionType.FROM_RIGHT_TO_CENTER);
+            }
+            return lastBranchShape;
+        }
+
         public ShapeWrapper buildTreeBranchV2(Node node, ShapeWrapper chainParentShape, double x, double y)
         {
             ShapeWrapper lastBranchShape = null;
@@ -179,15 +189,10 @@ namespace DiagramConstructor
                 lastBranchShape = buildTreeV2(node, chainParentShape, x, y);
                 y--;
             }
-            for (int i = 0; i < node.childNodes.Count; i++)
+            foreach(Node currentNode in node.childNodes)
             {
-                
-                Node currentNode = node.childNodes[i];
                 if (currentNode.nodeType == NodeType.COMMON || currentNode.nodeType == NodeType.INOUTPUT)
                 {
-                    //Master figureMasterToAdd = getFigureMasterByNodeType(currentNode.nodeType);
-                    //lastBranchShape = dropShapeV2(figureMasterToAdd, currentNode, x, y);
-                    //connectShapes(prevShape.shape, lastBranchShape.shape, line, ShapeConnectionType.FROM_TOP_TO_BOT);
                     lastBranchShape = buildTreeV2(currentNode, chainParentShape, x, y);
                 }
                 else
@@ -202,11 +207,11 @@ namespace DiagramConstructor
             if (chainParentShape != null)
             {
                 ShapeConnectionType shapeConnectionType = ShapeConnectionType.FROM_BOT_TO_LEFT;
-                if (chainParentShape.shapeType == NodeType.FOR && lastBranchShape.shapeType == NodeType.COMMON)
+                if (chainParentShape.shapeType == NodeType.FOR && lastBranchShape.isCommonShape())
                 {
                     shapeConnectionType = ShapeConnectionType.FROM_BOT_TO_LEFT;
                 }
-                else if (chainParentShape.shapeType == NodeType.FOR && lastBranchShape.shapeType != NodeType.COMMON)
+                else if (chainParentShape.shapeType == NodeType.FOR && !lastBranchShape.isCommonShape())
                 {
                     shapeConnectionType = ShapeConnectionType.FROM_RIGHT_TO_LEFT;
                 }
@@ -296,6 +301,30 @@ namespace DiagramConstructor
             Page visioPage = visioApp.ActivePage;
             ShapeWrapper shape = dropShapeV2(textField, text, x, y);
             return shape;
+        }
+
+        public ShapeConnectionType defineConnectionType(ShapeWrapper firstShape, ShapeWrapper secShape)
+        {
+            bool firstShapeIsCommon = firstShape.isCommonShape();
+            bool secShapeIsCommon = secShape.isCommonShape();
+            ShapeConnectionType shapeConnectionType = ShapeConnectionType.FROM_TOP_TO_RIGHT;
+            if (!firstShapeIsCommon && secShapeIsCommon)
+            {
+                shapeConnectionType = ShapeConnectionType.FROM_TOP_TO_RIGHT;
+            }
+            else if (firstShapeIsCommon && !secShapeIsCommon)
+            {
+                shapeConnectionType = ShapeConnectionType.FROM_TOP_TO_BOT;
+            }
+            else if (!firstShapeIsCommon && !secShapeIsCommon)
+            {
+                shapeConnectionType = ShapeConnectionType.FROM_RIGHT_TO_TOP;
+            }
+            else if (firstShapeIsCommon && secShapeIsCommon)
+            {
+                shapeConnectionType = ShapeConnectionType.FROM_TOP_TO_BOT;
+            }
+            return shapeConnectionType;
         }
 
         public void connectShapes(Shape shapeFrom, Shape shapeTo, Master connectorMaster, ShapeConnectionType connectionType)

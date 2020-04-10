@@ -47,7 +47,7 @@
     <Compile Include="ShapeConnectionType.cs" />
     <Compile Include="NodeType.cs" />
     <Compile Include="CodeParser.cs" />
-    <Compile Include="CodeThree.cs" />
+    <Compile Include="Method.cs" />
     <Compile Include="DiagramBuilder.cs" />
     <Compile Include="Node.cs" />
     <Compile Include="Program.cs" />
