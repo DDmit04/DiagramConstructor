@@ -10,10 +10,12 @@ namespace DiagramConstructor
     {
         COMMON,
         INOUTPUT,
+        PROGRAM,
+
         IF,
         ELSE,
         FOR,
-        WHILE,
-        PROGRAM
+        WHILE
+        
     }
 }

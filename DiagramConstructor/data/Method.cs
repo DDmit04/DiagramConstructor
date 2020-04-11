@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace DiagramConstructor
 {
-    class CodeThree
+    class Method
     {
         public String methodSignature { get; }
         public List<Node> methodNodes { get; }
 
-        public CodeThree(String methodSignature, List<Node> methodNodes)
+        public Method(String methodSignature, List<Node> methodNodes)
         {
             this.methodSignature = methodSignature;
             this.methodNodes = methodNodes;
