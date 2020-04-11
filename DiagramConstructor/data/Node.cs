@@ -8,11 +8,17 @@ namespace DiagramConstructor
 {
     class Node
     {
-        public NodeType nodeType { get; set; } = NodeType.COMMON;
+        public ShapeForm shapeForm { get; set; } = ShapeForm.PROCESS;
         public String nodeText { get; set; } = "no text";
         public List<Node> childNodes { get; set; } = new List<Node>();
         public List<Node> childIfNodes { get; set; } = new List<Node>();
         public List<Node> childElseNodes { get; set; } = new List<Node>();
+
+        public bool isSimpleNode()
+        {
+            return (childNodes.Count == 0 && childIfNodes.Count == 0 && childElseNodes.Count == 0)
+                && (shapeForm == ShapeForm.PROCESS || shapeForm == ShapeForm.PROGRAM || shapeForm == ShapeForm.IN_OUT_PUT);
+        }
 
     }
 }

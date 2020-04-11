@@ -9,17 +9,20 @@ namespace DiagramConstructor
 {
     class ShapeWrapper
     {
-        public ShapeWrapper(Shape shape, NodeType shapeType)
+        public ShapeWrapper(Shape shape, ShapeForm shapeType)
         {
             this.shape = shape;
             this.shapeType = shapeType;
         }
         public Shape shape { get; }
-        public NodeType shapeType {get;}
+        public ShapeForm shapeType {get;}
 
         public bool isCommonShape()
         {
-            return this.shapeType == NodeType.COMMON || this.shapeType == NodeType.INOUTPUT || this.shapeType == NodeType.PROGRAM;
+            return this.shapeType == ShapeForm.PROCESS 
+                || this.shapeType == ShapeForm.IN_OUT_PUT
+                || this.shapeType == ShapeForm.PROGRAM 
+                || this.shapeType == ShapeForm.BEGIN;
         }
 
     }

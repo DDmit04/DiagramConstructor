@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using Visio = Microsoft.Office.Interop.Visio;
 
 namespace DiagramConstructor
 {
@@ -14,7 +13,7 @@ namespace DiagramConstructor
             String code = "";
             if (Configuration.testRun)
             {
-                code = "main(){while(awdaw){awdawd;awd;}awdwad;}";
+                code = "voidprintArray(intnums[],intlen){for(inti=0;i<len;i++){cout<<nums[i]<<'';}cout<<endl;}intfindMinIndex(intarr[],intarrLength,intstart){intminIndex=start;intminElem=arr[start];for(inti=start;i<arrLength;i++){if(arr[i]<minElem){minElem=arr[i];minIndex=i;}}returnminIndex;}intmain(){inthelpVar=0;intminIndex=0;intarrLen=5;cout<<'inputarrlength\n';cin>>arrLen;int*nums=newint[arrLen];for(inti=0;i<arrLen;i++){cout<<'input['<<i<<']elementofarray\n';cin>>nums[i];}cout<<'inputedarray:\n';printArray(nums,arrLen);for(inti=0;i<arrLen;i++){minIndex=findMinIndex(nums,arrLen,i);helpVar=nums[i];nums[i]=nums[minIndex];nums[minIndex]=helpVar;}cout<<'3maxelements:\n';cout<<endl<<nums[arrLen-1]<<','<<nums[arrLen-2]<<','<<nums[arrLen-3]<<endl;}";
             }
             else
             {
@@ -28,6 +27,7 @@ namespace DiagramConstructor
                 if (!filepath.Equals(""))
                 {
                     Configuration.resultFilePath = filepath;
+                    Console.WriteLine("Result file folder path: " + filepath);
                 } 
                 else
                 {

@@ -43,10 +43,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="actor\BuilderUtills.cs" />
+    <Compile Include="actor\ShapeManipulator.cs" />
     <Compile Include="App.cs" />
     <Compile Include="Configuration.cs" />
+    <Compile Include="enum\ShapeForm.cs" />
     <Compile Include="enum\ShapeConnectionType.cs" />
-    <Compile Include="enum\NodeType.cs" />
     <Compile Include="actor\CodeParser.cs" />
     <Compile Include="data\Method.cs" />
     <Compile Include="actor\DiagramBuilder.cs" />

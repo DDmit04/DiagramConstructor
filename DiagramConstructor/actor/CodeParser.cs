@@ -23,7 +23,7 @@ namespace DiagramConstructor
             String methodBlock = "";
             String methodSignature = "";
             Method newMethod = new Method("no method!", new List<Node>());
-            while (codeToParse.Length > 2)
+            while (codeIsEmptyMarcks(codeToParse))
             {
                 nextMethodCode = getNextCodeBlock(codeToParse);
                 methodCodeBegin = nextMethodCode.IndexOf('{');
@@ -50,7 +50,7 @@ namespace DiagramConstructor
                 || code.IndexOf("while(") == 1 
                 || code.IndexOf("for(") == 1 
                 || code.IndexOf("else{") == 1;
-            bool codeIsSurroundedByMarcks = code[0] == '{' && code[code.Length - 1] == '}';
+            bool codeIsSurroundedByMarcks = code[0].Equals('{') && code[code.Length - 1].Equals('}');
             return codeIsSurroundedByMarcks && langStateIsNearToBegin;
         }
 
@@ -76,7 +76,7 @@ namespace DiagramConstructor
         /// <returns>string from begin to index of closing } (count of { and } in result string is equal)</returns>
         public String getNextCodeBlock(String code)
         {
-            if (code[0] == '{' && code[code.Length - 1] == '}')
+            if (code[0].Equals('{') && code[code.Length - 1].Equals('}'))
             {
                 code = code.Remove(0, 1).Insert(0, "");
                 code = code.Remove(code.Length - 1, 1).Insert(code.Length - 1, "");
@@ -87,11 +87,11 @@ namespace DiagramConstructor
             int endIndex = 0;
             for (endIndex = 0; endIndex < code.Length; endIndex++)
             {
-                if (code[endIndex] == '}')
+                if (code[endIndex].Equals('}'))
                 {
                     openMarck++;
                 }
-                if (code[endIndex] == '{')
+                if (code[endIndex].Equals('{'))
                 {
                     closeMarck++;
                 }
@@ -101,7 +101,7 @@ namespace DiagramConstructor
                     break;
                 }
             }
-            if(codeBlock == "")
+            if(codeBlock.Equals(""))
             {
                 codeBlock = code;
             }
@@ -130,7 +130,7 @@ namespace DiagramConstructor
                     nodeCodeLine = nodeCodeLine.Replace("if(", "");
                     nodeCodeLine = nodeCodeLine.Replace(")", "");
                     newNode.nodeText = nodeCodeLine;
-                    newNode.nodeType = NodeType.IF;
+                    newNode.shapeForm = ShapeForm.IF;
 
                     newNode.childIfNodes = parseNode(nextCodeBlock.Substring(nextLineDivider));
 
@@ -155,7 +155,7 @@ namespace DiagramConstructor
                     nodeCodeLine = nodeCodeLine.Replace("for(", "");
                     nodeCodeLine = nodeCodeLine.Replace(")", "");
                     newNode.nodeText = nodeCodeLine;
-                    newNode.nodeType = NodeType.FOR;
+                    newNode.shapeForm = ShapeForm.FOR;
                     newNode.childNodes = parseNode(nextCodeBlock.Substring(nextLineDivider));
                     resultNodes.Add(newNode);
                 } 
@@ -166,7 +166,7 @@ namespace DiagramConstructor
                     nodeCodeLine = nodeCodeLine.Replace("while(", "");
                     nodeCodeLine = nodeCodeLine.Replace(")", "");
                     newNode.nodeText = nodeCodeLine;
-                    newNode.nodeType = NodeType.WHILE;
+                    newNode.shapeForm = ShapeForm.WHILE;
                     newNode.childNodes = parseNode(nextCodeBlock.Substring(nextLineDivider));
                     resultNodes.Add(newNode);
                 } 
@@ -188,7 +188,7 @@ namespace DiagramConstructor
                             nodeCodeLine = nodeCodeLine.Replace("cin»", "Ввод ");
                             nodeCodeLine = nodeCodeLine.Replace("«endl", "");
                             nodeCodeLine = nodeCodeLine.Replace("<<endl", "");
-                            node.nodeType = NodeType.INOUTPUT;
+                            node.shapeForm = ShapeForm.IN_OUT_PUT;
 
                         }
                         else if(nodeCodeLine.IndexOf("cout<<") == 0 || nodeCodeLine.IndexOf("cout«") == 0)
@@ -197,18 +197,18 @@ namespace DiagramConstructor
                             nodeCodeLine = nodeCodeLine.Replace("cout«", "Ввод ");
                             nodeCodeLine = nodeCodeLine.Replace("«endl", "");
                             nodeCodeLine = nodeCodeLine.Replace("<<endl", "");
-                            node.nodeType = NodeType.INOUTPUT;
+                            node.shapeForm = ShapeForm.IN_OUT_PUT;
                         }
                         else
                         {
-                            node.nodeType = NodeType.COMMON;
+                            node.shapeForm = ShapeForm.PROCESS;
                         }
 
                         Regex methodSingleCall = new Regex(@"(\w*)\((\w*)\)");
                         Regex methodReturnCall = new Regex(@"(\w*)(\=)(\w*)\((\w*)\)");
                         if (methodSingleCall.IsMatch(nodeCodeLine) || methodReturnCall.IsMatch(nodeCodeLine))
                         {
-                            node.nodeType = NodeType.PROGRAM;
+                            node.shapeForm = ShapeForm.PROGRAM;
                         }
 
                         node.nodeText = nodeCodeLine.Replace(";", "");
