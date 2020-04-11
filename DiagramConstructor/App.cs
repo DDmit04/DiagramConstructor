@@ -11,9 +11,16 @@ namespace DiagramConstructor
     {
         public void RunApp(String code)
         {
+
             CodeParser codeParser = new CodeParser(code);
+
+            Console.WriteLine("Parsing code...");
             DiagramBuilder diagramBuider = new DiagramBuilder(codeParser.ParseCode());
+
+            Console.WriteLine("Building diagram...");
             diagramBuider.buildDiagram();
+            Console.WriteLine("Finished!");
+            Console.WriteLine("Builded diagram was saved to: " + Configuration.finalFilePath);
         }
     }
 }

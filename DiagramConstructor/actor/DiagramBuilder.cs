@@ -30,6 +30,7 @@ namespace DiagramConstructor
         /// </summary>
         public void buildDiagram()
         {
+
             shapeManipulator.openDocument();
 
             foreach (Method method in codeThree)
@@ -59,7 +60,8 @@ namespace DiagramConstructor
             {
                 Console.ReadKey();
             }
-            shapeManipulator.closeDocument();
+
+            Configuration.finalFilePath = shapeManipulator.closeDocument();
         }
 
         /// <summary>
@@ -114,6 +116,7 @@ namespace DiagramConstructor
                 lastBranchShape = startIfElseBranch(node, currentNodeShape, x, y);
                 //IMPORTANT (here method must be after)
                 updateGlobalValuesBeforeRecursion(true, lastBranchShape);
+                coreY--;
             } 
             else if (node.shapeForm == ShapeForm.WHILE)
             {

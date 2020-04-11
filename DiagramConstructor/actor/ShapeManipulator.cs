@@ -57,7 +57,7 @@ namespace DiagramConstructor.actor
 
         public String closeDocument()
         {
-            String resulrFilePath = Configuration.resultFilePath + @"\result" + DateTime.Now.ToString("MM/dd/yyyy h:mm:ss") + ".vsdx";
+            String resulrFilePath = Configuration.customFilePath + @"\result" + DateTime.Now.ToString("yyyy_MM_dd__HH_mm_ss_fff") + ".vsdx";
             visioApp.ActiveDocument.SaveAs(resulrFilePath);
             visioStencil.Close();
             visioApp.ActiveDocument.Close();

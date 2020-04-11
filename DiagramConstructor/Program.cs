@@ -26,13 +26,9 @@ namespace DiagramConstructor
                 String filepath = readFilePath();
                 if (!filepath.Equals(""))
                 {
-                    Configuration.resultFilePath = filepath;
-                    Console.WriteLine("Result file folder path: " + filepath);
-                } 
-                else
-                {
-                    Console.WriteLine("using default result file folder path!");
+                    Configuration.customFilePath = filepath;
                 }
+                Console.WriteLine("Result file folder path: " + Configuration.customFilePath);
                 Console.WriteLine("input code to create diagram:");
                 code = readCode();
             }
