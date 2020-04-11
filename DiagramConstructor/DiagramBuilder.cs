@@ -84,8 +84,7 @@ namespace DiagramConstructor
                 coreY = startY;
             }
 
-            String documetsRoot = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            visioApp.ActiveDocument.SaveAs(documetsRoot + @"\result.vsdx");
+            visioApp.ActiveDocument.SaveAs(Configuration.resultFilePath + @"\result.vsdx");
             visioApp.ActiveDocument.Close();
             visioStencil.Close();
         }

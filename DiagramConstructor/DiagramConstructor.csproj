@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App.cs" />
+    <Compile Include="Configuration.cs" />
     <Compile Include="ShapeConnectionType.cs" />
     <Compile Include="NodeType.cs" />
     <Compile Include="CodeParser.cs" />
