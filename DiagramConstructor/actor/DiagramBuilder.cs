@@ -34,8 +34,6 @@ namespace DiagramConstructor
 
         private List<Method> codeThree;
 
-        public NodeType ShapeConn { get; private set; }
-
         public DiagramBuilder(List<Method> codeThree)
         {
             this.codeThree = codeThree;
