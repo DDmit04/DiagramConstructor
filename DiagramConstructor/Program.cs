@@ -9,13 +9,13 @@ namespace DiagramConstructor
     class Program
     {
 
-        private static bool test = false;
+        private static bool test = true;
         static void Main(string[] args)
         {
             String code = "";
             if (test)
             {
-                code = "for(awdaw){for(awdawd){if(awdad){awdaw;}else{awdawd;}awdadw;}awdawd;}";
+                code = "main(){while(awdaw){awdawd;awd;}awdwad;}";
             }
             else
             {

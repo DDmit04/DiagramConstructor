@@ -42,7 +42,11 @@ namespace DiagramConstructor
             return methods;
         }
 
-       
+        /// <summary>
+        /// Check is it necessary to delete {} sorrounded string
+        /// </summary>
+        /// <param name="code">string to check</param>
+        /// <returns> string surrounded by {} and contains (if | else | while | ...) as first operand</returns>
         public bool nextCodeIsSimple(String code)
         {
             bool langStateIsNearToBegin = code.IndexOf("if(") == 1 
@@ -53,7 +57,11 @@ namespace DiagramConstructor
             return codeIsSurroundedByMarcks && langStateIsNearToBegin;
         }
 
-        
+        /// <summary>
+        /// Delete {} surrounded string if this necessary
+        /// </summary>
+        /// <param name="code">string to modify</param>
+        /// <returns>modified string</returns> 
         public String checkCodeSimplenes(String code)
         {
             if (nextCodeIsSimple(code))
@@ -64,7 +72,11 @@ namespace DiagramConstructor
             return code;
         }
 
-        
+        /// <summary>
+        /// Returns code block extracted from string (example - while(a > b){a--; b++} cout<<a; cout<<b; --> while(a > b){a--; b++})
+        /// </summary>
+        /// <param name="code">code to search blocks</param>
+        /// <returns>string from begin to index of closing } (count of { and } in result string is equal)</returns>
         public String getNextCodeBlock(String code)
         {
             if (code[0] == '{' && code[code.Length - 1] == '}')
@@ -99,6 +111,12 @@ namespace DiagramConstructor
             return codeBlock;
         }
 
+        /// <summary>
+        /// Recursive method which convert code lines to AST nodes 
+        /// (if it meets if | else | while | ... it create node and put in it's child nodes result of itself call)
+        /// </summary>
+        /// <param name="nodeCode">code to convert</param>
+        /// <returns>list of code ASTs</returns>
         public List<Node> parseNode(String nodeCode)
         {
             List<Node> resultNodes = new List<Node>();
@@ -157,7 +175,6 @@ namespace DiagramConstructor
                 } 
                 else
                 {
-                    bool blockIsSimple = codeBlockIsSimple(nodeCode);
                     String copy = nextCodeBlock;
                     while (codeIsEmptyMarcks(copy)) {
                         Node node = new Node();
@@ -210,12 +227,24 @@ namespace DiagramConstructor
             return resultNodes;
         }
 
+        /// <summary>
+        /// Check is text contains code operators
+        /// </summary>
+        /// <param name="text">text to check</param>
+        /// <returns>Is code contains only { and } chars</returns>
         public bool codeIsEmptyMarcks(String text)
         {
             Regex regex = new Regex(@"(\w*\;)");
             return regex.IsMatch(text);
         }
 
+        /// <summary>
+        /// Replace fist ocurence in some string of some string 
+        /// </summary>
+        /// <param name="text">text to search ocurence</param>
+        /// <param name="textToReplace">text for replace</param>
+        /// <param name="replace">text to replace </param>
+        /// <returns>modifyed text</returns>
         public String replaceFirst(String text, String textToReplace, String replace)
         {
             Regex regex = new Regex(Regex.Escape(textToReplace));
@@ -223,14 +252,11 @@ namespace DiagramConstructor
             return text;
         }
 
-        public bool codeBlockIsSimple(String line)
-        {
-            return line.IndexOf("if(") == -1 
-                && line.IndexOf("for(") == -1
-                && line.IndexOf("while(") == -1 
-                && line.IndexOf("switch(") == -1;
-        }
-
+        /// <summary>
+        /// Check is code not started with (if | for | while | ...)
+        /// </summary>
+        /// <param name="line">code to check</param>
+        /// <returns>bool</returns>
         public bool lineIsSimple(String line)
         {
             return !(line.IndexOf("if(") == 0
