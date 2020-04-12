@@ -54,7 +54,7 @@ namespace DiagramConstructor
 
                 updateGlobalValuesBeforeRecursion(globalIsSameBranch, null);
 
-                startX += 4;
+                startX += 4.5;
                 coreX = startX;
                 coreY = startY;
             }
@@ -160,8 +160,8 @@ namespace DiagramConstructor
         /// <returns>last shape in branch</returns>
         public ShapeWrapper startWhileBranch(Node node, ShapeWrapper currentNodeShape, double x, double y)
         {
-            shapeManipulator.adSmallTextField("Да", x + 0.38, y + 1 - 0.5);
-            shapeManipulator.adSmallTextField("Нет", x + 0.7, y + 1 + 0.2);
+            shapeManipulator.adSmallTextField("Да", x + 0.38, y + 0.5);
+            shapeManipulator.adSmallTextField("Нет", x + 0.7, y + 1.5);
             y -= 0.2;
             ShapeWrapper lastBranchShape = buildTreeBranchV2(node, currentNodeShape, x, y);
             return lastBranchShape;
@@ -186,25 +186,17 @@ namespace DiagramConstructor
 
             ShapeWrapper invisibleBlock = shapeManipulator.dropShapeV2(ShapeForm.INVISIBLE_BLOCK, "", x, y - statementHeight);
 
-            if (lastBranchShape.isCommonShape())
-            {
-                shapeManipulator.connectShapes(invisibleBlock.shape, lastBranchShape.shape, ShapeForm.LINE, ShapeConnectionType.FROM_BOT_TO_CENTER);
-            }
-            else
-            {
-                shapeManipulator.connectShapes(invisibleBlock.shape, lastBranchShape.shape, ShapeForm.LINE, ShapeConnectionType.FROM_RIGHT_TO_CENTER);
-            }
+            shapeManipulator.connectLastShapeToInvisibleBlock(invisibleBlock, lastBranchShape);
 
             if (node.childElseNodes.Count != 0)
             {
                 lastBranchShape = buildIfElseTreeBranchV2(node.childElseNodes, currentNodeShape, ShapeConnectionType.FROM_RIGHT_TO_TOP, x + 1.2, y);
-                shapeManipulator.connectShapes(invisibleBlock.shape, lastBranchShape.shape, ShapeForm.LINE, ShapeConnectionType.FROM_BOT_TO_CENTER);
+                shapeManipulator.connectLastShapeToInvisibleBlock(invisibleBlock, lastBranchShape);
             }
             else
             {
                 shapeManipulator.connectShapes(invisibleBlock.shape, currentNodeShape.shape, ShapeForm.LINE, ShapeConnectionType.FROM_RIGHT_TO_CENTER);
             }
-            ifWas = true;
             return invisibleBlock;
         }
 
@@ -271,19 +263,18 @@ namespace DiagramConstructor
             for (int i = 0; i < nodes.Count; i++)
             {
                 Node node = nodes[i];
-                if(i == 0)
+                if (node.isSimpleNode() && i == 0)
                 {
-                    if (node.isSimpleNode())
+                    lastBranchShape = shapeManipulator.dropShapeV2(node, x, y);
+                    shapeManipulator.connectShapes(lastBranchShape.shape, chainParentShape.shape, ShapeForm.LINE, ifElseConnectionType);
+                    //IMPORTANT (global droped shape is changes every time when recursion call)!!!
+                    updateGlobalValuesBeforeRecursion(true, lastBranchShape);
+                } 
+                else if(i == 0)
+                {
+                    if(node.shapeForm == ShapeForm.IF)
                     {
-                        lastBranchShape = shapeManipulator.dropShapeV2(node, x, y);
-                        shapeManipulator.connectShapes(lastBranchShape.shape, chainParentShape.shape, ShapeForm.LINE, ifElseConnectionType);
-                        //IMPORTANT (global droped shape is changes every time when recursion call)!!!
-                        updateGlobalValuesBeforeRecursion(true, lastBranchShape);
-                    } 
-                    else
-                    {
-                        ifWas = false;
-                        if (ifElseConnectionType == ShapeConnectionType.FROM_LEFT_TO_TOP)
+                        if(ifElseConnectionType == ShapeConnectionType.FROM_LEFT_TO_TOP)
                         {
                             x -= 1.2;
                         }
@@ -296,10 +287,16 @@ namespace DiagramConstructor
                         shapeManipulator.connectShapes(lastBranchShape.shape, chainParentShape.shape, ShapeForm.LINE, ifElseConnectionType);
                         y--;
                         lastBranchShape = startIfElseBranch(node, lastBranchShape, x, y);
-                        //IMPORTANT (here method must be after)
-                        updateGlobalValuesBeforeRecursion(true, lastBranchShape);
-                        coreY -= 0.2;
                     }
+                    else
+                    {
+                        //IMPORTANT rest global shape baccause current shape is connected manualy
+                        updateGlobalValuesBeforeRecursion(false, null);
+                        lastBranchShape = buildTreeV2(node, x, y);
+                        shapeManipulator.connectShapes(lastBranchShape.shape, chainParentShape.shape, ShapeForm.LINE, ifElseConnectionType);
+                    }
+                    updateGlobalValuesBeforeRecursion(true, lastBranchShape);
+                    coreY -= 0.2;
                 }
                 else if (node.isSimpleNode())
                 {

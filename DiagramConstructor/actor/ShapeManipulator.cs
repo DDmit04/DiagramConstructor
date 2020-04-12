@@ -158,6 +158,23 @@ namespace DiagramConstructor.actor
         }
 
         /// <summary>
+        /// Connect last if/else branch shape with invisibe shape (connect both branches in one place)
+        /// </summary>
+        /// <param name="invisibleBlock">invisible block shape wrapper</param>
+        /// <param name="lastBranchShape">last branch shape wrapper</param>
+        public void connectLastShapeToInvisibleBlock(ShapeWrapper invisibleBlock, ShapeWrapper lastBranchShape)
+        {
+            if (lastBranchShape.isCommonShape())
+            {
+                connectShapes(invisibleBlock.shape, lastBranchShape.shape, ShapeForm.LINE, ShapeConnectionType.FROM_BOT_TO_CENTER);
+            }
+            else
+            {
+                connectShapes(invisibleBlock.shape, lastBranchShape.shape, ShapeForm.LINE, ShapeConnectionType.FROM_RIGHT_TO_CENTER);
+            }
+        }
+
+        /// <summary>
         /// Get figure master from visio shape form
         /// </summary>
         /// <param name="shapeForm">form to get master</param>

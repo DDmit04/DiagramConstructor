@@ -16,8 +16,12 @@ namespace DiagramConstructor
 
         public bool isSimpleNode()
         {
-            return (childNodes.Count == 0 && childIfNodes.Count == 0 && childElseNodes.Count == 0)
-                && (shapeForm == ShapeForm.PROCESS || shapeForm == ShapeForm.PROGRAM || shapeForm == ShapeForm.IN_OUT_PUT);
+            return shapeForm == ShapeForm.PROCESS || shapeForm == ShapeForm.PROGRAM || shapeForm == ShapeForm.IN_OUT_PUT;
+        }
+
+        public bool isNoChileNodes()
+        {
+            return childNodes.Count == 0 && childIfNodes.Count == 0 && childElseNodes.Count == 0;
         }
 
     }

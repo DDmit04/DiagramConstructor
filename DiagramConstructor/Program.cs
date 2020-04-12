@@ -7,13 +7,13 @@ namespace DiagramConstructor
 
     class Program
     {
-
         static void Main(string[] args)
         {
             String code = "";
             if (Configuration.testRun)
             {
-                code = "main(){if(111){if(222){111;}else{222;}}}";
+                code = "main(){inta=10;for(inti=0;i<a;i++){if(a*2==4){cout<<'someoutput';}else{cout<<'othetoutput';}}}doSome(inta,intb){if(a>b){while(a!=b){a--;}}else{while(a!=b){b--;}}cout<<'justice';}";
+
             }
             else
             {
