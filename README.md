@@ -10,19 +10,23 @@ Console С# application creating visio diagrams from C++ code.
 
 ![Example1](/examples/Example1.png?raw=true)
 
-* Input cosen code in code converter (can be opened from console):
+
+* Input cosen code in code converter which can be opened from app console:
 
 ![Example2](/examples/Example2.png?raw=true)
 
-convert it to one single line
+
+* convert it to one single line
 
 ![Example3](/examples/Example3.png?raw=true)
 
-write result file path (optional)
+
+* write result file path (optional)
 
 ![Example4](/examples/Example4.png?raw=true)
 
-and input converted code in console
+
+* and input converted code in console
 
 ![Example5](/examples/Example5.png?raw=true)
 
