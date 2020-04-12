@@ -35,7 +35,7 @@ Console С# application creating visio diagrams from C++ code.
 
 # Recomendation for better app work
 
-* You need licensed or cracked Visio (you can try run visioActivator.cmd with admin rights to get license)
+* You need licensed or cracked Visio (you can try run visioActivator.cmd in root of this repo with admin rights to get license)
 
 * Then simpler and cleaner the code you wrote, the easier it is to create a diagram.
 
@@ -132,7 +132,7 @@ Console С# application creating visio diagrams from C++ code.
 + }
 ```
 
-* "switch" isn't supported - use "else if"
+* "switch" construction isn't supported - use "else if"
 
 * "do-while" constructions isn't supported too. Replace it by one block, and add this constructions manualy after application do work.
 
