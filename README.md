@@ -132,9 +132,13 @@ Console С# application creating visio diagrams from C++ code.
 + }
 ```
 
-* "switch" construction isn't supported - use "else if"
+# Unsupported
 
-* "do-while" constructions isn't supported too. Replace it by one block, and add this constructions manualy after application do work.
+* "Break" and "continue"
+
+* "switch" - use "else if" instead of it
+
+* "do-while" - replace it by one block, and add this constructions manualy after application do work.
 
 # Example
 
