@@ -31,7 +31,7 @@ and input converted code in console
 
 # Recomendation for better app work
 
-* Еhe simpler and cleaner the code you wrote, the easier it is to create a diagram.
+* Then simpler and cleaner the code you wrote, the easier it is to create a diagram.
 
 * Code to input in console must be converted (no spaces, tabs and line breaks):
 
@@ -102,7 +102,7 @@ and input converted code in console
 - }
 ```
 
-* "switch" and "do-while" constructions isn't supported now
+* "switch" and "do-while" constructions isn't supported now. Replace them by one block, and add this constructions manualy after application do work.
 
 # Bugs and errors
 
