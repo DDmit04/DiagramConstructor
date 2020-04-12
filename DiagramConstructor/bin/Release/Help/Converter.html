@@ -39,10 +39,11 @@
     var resultCode = document.getElementById('resultCode');
 
     convertBtn.addEventListener('click', () => {
-        resultCode.value = codeToConvert.value.replace(/^using\s*namespace\s*\w*\;/gm, "")
+        resultCode.value = codeToConvert.value.replace(/\/\/\S*/g, '');
+        resultCode.value = resultCode.value.replace(/^using\s*namespace\s*\w*\;/gm, "")
         resultCode.value = resultCode.value.replace(/^\#\w*\s*[\<|\"]\w*\.*\w?[\>|\"]/gm, "")
         resultCode.value = resultCode.value.split('"').join('\'');
-        resultCode.value = resultCode.value.replace(/\r|\n/g, '');
+        resultCode.value = resultCode.value.replace(/\r|\n|\t/g, '');
         resultCode.value = resultCode.value.split(' ').join('');
     });
 

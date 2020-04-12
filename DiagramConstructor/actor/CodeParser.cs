@@ -34,7 +34,15 @@ namespace DiagramConstructor
                 methodBlock = methodBlock.Remove(methodBlock.Length - 1, 1);
                 methodNodes = parseNode(methodBlock);
                 newMethod = new Method(methodSignature, methodNodes);
-                methods.Add(newMethod);
+                if (methodSignature.IndexOf("mian(") != 0)
+                {
+                    methods.Insert(0, newMethod);
+                }
+                else
+                {
+                    methods.Add(newMethod);
+                }
+                
             }
             return methods;
         }
@@ -63,7 +71,7 @@ namespace DiagramConstructor
         {
             if (nextCodeIsSimple(code))
             {
-                code = code.Remove(0, 1).Insert(0, "");
+                code = code.Remove(0, 1);
                 code = code.Remove(code.Length - 1, 1);
             }
             return code;
@@ -78,8 +86,8 @@ namespace DiagramConstructor
         {
             if (code[0].Equals('{') && code[code.Length - 1].Equals('}'))
             {
-                code = code.Remove(0, 1).Insert(0, "");
-                code = code.Remove(code.Length - 1, 1).Insert(code.Length - 1, "");
+                code = code.Remove(0, 1);
+                code = code.Remove(code.Length - 1, 1);
             }
             String codeBlock = "";
             int openMarck = 0;
@@ -136,13 +144,17 @@ namespace DiagramConstructor
 
                     String localCode = replaceFirst(nodeCode, nextCodeBlock, "");
 
-                    if (localCode.Length > 2)
+                    if (codeIsEmptyMarcks(localCode))
                     {
                         String onotherNextBlock = getNextCodeBlock(localCode);
+                        if(onotherNextBlock.IndexOf("elseif") == 0)
+                        {
+                            onotherNextBlock = localCode;
+                        }
                         if (onotherNextBlock.IndexOf("else") == 0)
                         {
                             nodeCode = nodeCode.Replace(onotherNextBlock, "");
-                            onotherNextBlock = onotherNextBlock.Replace("else", "");
+                            onotherNextBlock = replaceFirst(onotherNextBlock, "else", "");
                             newNode.childElseNodes = parseNode(onotherNextBlock);
                         }
                     }

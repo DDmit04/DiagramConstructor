@@ -121,5 +121,42 @@ namespace DiagramConstructor.actor
             }
         }
 
+        /// <summary>
+        /// Returns max child branch length (num of nodes)
+        /// </summary>
+        /// <param name="node">parent node</param>
+        /// <returns>max num of nodes</returns>
+        public static int calcStatementHeight(Node node)
+        {
+            int commonBrannchMaxLength = 0;
+            int elseBrannchMaxLength = 0;
+            int ifBrannchMaxLength = 0;
+            if (node.childNodes.Count != 0)
+            {
+                foreach (Node n in node.childNodes)
+                {
+                    commonBrannchMaxLength++;
+                    commonBrannchMaxLength += calcStatementHeight(n);
+                }
+            }
+            if (node.childIfNodes.Count != 0)
+            {
+                foreach (Node n in node.childIfNodes)
+                {
+                    ifBrannchMaxLength++;
+                    ifBrannchMaxLength += calcStatementHeight(n);
+                }
+            }
+            if (node.childElseNodes.Count != 0)
+            {
+                foreach (Node n in node.childElseNodes)
+                {
+                    elseBrannchMaxLength++;
+                    elseBrannchMaxLength += calcStatementHeight(n);
+                }
+            }
+            return Math.Max(commonBrannchMaxLength, Math.Max(elseBrannchMaxLength, ifBrannchMaxLength));
+        }
+
     }
 }
