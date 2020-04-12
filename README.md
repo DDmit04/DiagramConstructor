@@ -108,7 +108,81 @@ Console С# application creating visio diagrams from C++ code.
 - }
 ```
 
-* "switch" and "do-while" constructions isn't supported now. Replace them by one block, and add this constructions manualy after application do work.
+* Use only standart "else if" form:
+
+``` diff
+- if(a == 10)
+- {
+-     a--;
+- }
+- else 
+- { 
+-     if(a == 20)
+-     {
+-         a--;
+-     }
+
++ if(a == 10)
++ {
++     a--;
++ }
++ else if(a == 20)
++ {
++     a--;
++ }
+```
+
+* "switch" isn't supported - use "else if"
+
+* "do-while" constructions isn't supported too. Replace it by one block, and add this constructions manualy after application do work.
+
+# Example
+
+From this code:
+``` C++
+#include <iostream>
+
+using namespace std;
+
+main()
+{
+    int a = 10;
+    for (int i = 0; i < a; i++)
+    {
+        if (a * 2 == 4)
+        {
+            cout << "some output";
+        }
+        else
+        {
+        cout << "othet output";
+        }
+    }
+}
+
+doSome(int a, int b)
+{
+    if(a > b)
+    {
+        while(a != b)
+        {
+            a--;
+        }
+    } 
+    else
+    {
+        while (a != b)
+        {
+            b--;
+        }
+    }
+    cout << "justice";
+}
+```
+
+you can get this diagram:
+
+![Example6](/examples/Example6.png?raw=true)
 
 # Bugs and errors
 
