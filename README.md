@@ -6,34 +6,36 @@ Console С# application creating visio diagrams from C++ code.
 
 * For start app download /DiagramConstructor/bin/Release directory (or whole repo) and run DiagramConstructor.exe 
 
-* Choose code to build diagram (all code inside target method) this part will be improved later:
+* Choose code to build diagram (you can copy all file):
 
-``` diff
-- void main()
-+       String code = "";
-+       if (test)
-+       {
-+           code = "test code";
-+       }
-+       app.RunApp(code);
--       }
-```
+![Example1](/examples/Example1.png?raw=true)
 
-* Input cosen code in code converter (can be opened from console):
 
-![Example2](/examples/Example1.png?raw=true)
-
-convert it to one single line
+* Input cosen code in code converter which can be opened from app console:
 
 ![Example2](/examples/Example2.png?raw=true)
 
-and input converted code in console
+
+* convert it to one single line
 
 ![Example3](/examples/Example3.png?raw=true)
 
-* Look for "result.vsdx" in default documents folder of your PC.
+
+* write result file path (optional)
+
+![Example4](/examples/Example4.png?raw=true)
+
+
+* and input converted code in console
+
+![Example5](/examples/Example5.png?raw=true)
+
+
+* Look for .vsdx file in inputed file path or default documents folder of your PC.
 
 # Recomendation for better app work
+
+* Then simpler and cleaner the code you wrote, the easier it is to create a diagram.
 
 * Code to input in console must be converted (no spaces, tabs and line breaks):
 
@@ -81,16 +83,19 @@ and input converted code in console
 - String myString = "if(a == 0) { int a = 10; }"; 
 ```
 
-* Вon't use too complex "if" constructions
+* Don't use too complex "if" constructions
 
 ``` diff
 - if(a == 10) 
 - {
 -     if(b == 20)
 -     {
--         b = 0;
+-         if(c == 0)
+-         {
+-             c == 0;
+-         }
 -     }
--     else 
+-     else
 -     {
 -         b = 100;
 -     }
@@ -101,4 +106,8 @@ and input converted code in console
 - }
 ```
 
-* "switch" and "do-while" constructions isn't supported now (probably "do-while" will nevwe be supported)
+* "switch" and "do-while" constructions isn't supported now. Replace them by one block, and add this constructions manualy after application do work.
+
+# Bugs and errors
+
+Send all bugs and errors (with console screen, inputed code and result diagram) in "issues" section of this repository.
