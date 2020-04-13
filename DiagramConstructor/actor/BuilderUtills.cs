@@ -67,7 +67,14 @@ namespace DiagramConstructor.actor
             }
             else if (!firstShapeIsCommon && !secShapeIsCommon)
             {
-                shapeConnectionType = ShapeConnectionType.FROM_TOP_TO_BOT;
+                if(isSameBranch)
+                {
+                    shapeConnectionType = ShapeConnectionType.FROM_TOP_TO_BOT;
+                }
+                else
+                {
+                    shapeConnectionType = ShapeConnectionType.FROM_TOP_TO_RIGHT;
+                }
             }
             else if (firstShapeIsCommon && secShapeIsCommon)
             {

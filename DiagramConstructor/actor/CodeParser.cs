@@ -23,7 +23,7 @@ namespace DiagramConstructor
             String methodBlock = "";
             String methodSignature = "";
             Method newMethod = new Method("no method!", new List<Node>());
-            while (codeIsEmptyMarcks(codeToParse))
+            while (!codeIsEmptyMarcks(codeToParse))
             {
                 nextMethodCode = getNextCodeBlock(codeToParse);
                 methodCodeBegin = nextMethodCode.IndexOf('{');
@@ -128,7 +128,7 @@ namespace DiagramConstructor
             int nextLineDivider = 0;
             String nextCodeBlock = "";
             String nodeCodeLine = "";
-            while (codeIsEmptyMarcks(nodeCode)) {
+            while (!codeIsEmptyMarcks(nodeCode)) {
                 Node newNode = new Node();
                 nextCodeBlock = getNextCodeBlock(nodeCode);
                 if (nextCodeBlock.IndexOf("if(") == 0)
@@ -144,7 +144,7 @@ namespace DiagramConstructor
 
                     String localCode = replaceFirst(nodeCode, nextCodeBlock, "");
 
-                    if (codeIsEmptyMarcks(localCode))
+                    if (!codeIsEmptyMarcks(localCode))
                     {
                         String onotherNextBlock = getNextCodeBlock(localCode);
                         if(onotherNextBlock.IndexOf("elseif") == 0)
@@ -184,8 +184,11 @@ namespace DiagramConstructor
                 } 
                 else
                 {
+                    Regex methodSingleCall = new Regex(@"(\S*)\((\S*)\)");
+                    Regex methodReturnCall = new Regex(@"(\S*)(\=)(\S*)\((\S*)\)");
+                    Regex methodCallOnObject = new Regex(@"\S*\=\S*\.\S*\(\S*\)");
                     String copy = nextCodeBlock;
-                    while (codeIsEmptyMarcks(copy)) {
+                    while (!codeIsEmptyMarcks(copy)) {
                         Node node = new Node();
                         nextLineDivider = copy.IndexOf(';');
                         nodeCodeLine = copy.Substring(0, nextLineDivider + 1);
@@ -211,16 +214,15 @@ namespace DiagramConstructor
                             nodeCodeLine = nodeCodeLine.Replace("<<endl", "");
                             node.shapeForm = ShapeForm.IN_OUT_PUT;
                         }
+                        else if(methodSingleCall.IsMatch(nodeCodeLine) 
+                            || methodReturnCall.IsMatch(nodeCodeLine) 
+                            || methodCallOnObject.IsMatch(nodeCodeLine))
+                        {
+                            node.shapeForm = ShapeForm.PROGRAM;
+                        }
                         else
                         {
                             node.shapeForm = ShapeForm.PROCESS;
-                        }
-
-                        Regex methodSingleCall = new Regex(@"(\w*)\((\w*)\)");
-                        Regex methodReturnCall = new Regex(@"(\w*)(\=)(\w*)\((\w*)\)");
-                        if (methodSingleCall.IsMatch(nodeCodeLine) || methodReturnCall.IsMatch(nodeCodeLine))
-                        {
-                            node.shapeForm = ShapeForm.PROGRAM;
                         }
 
                         node.nodeText = nodeCodeLine.Replace(";", "");
@@ -244,7 +246,7 @@ namespace DiagramConstructor
         public bool codeIsEmptyMarcks(String text)
         {
             Regex regex = new Regex(@"(\w*\;)");
-            return regex.IsMatch(text);
+            return !regex.IsMatch(text);
         }
 
         /// <summary>

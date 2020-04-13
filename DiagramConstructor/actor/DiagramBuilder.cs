@@ -10,8 +10,6 @@ namespace DiagramConstructor
         private ShapeWrapper globalLastDropedShapeV2;
         private bool globalIsSameBranch = false;
 
-        private bool ifWas = false;
-
         private double startX = 1.25;
         private double coreX = 1.25;
 
@@ -122,7 +120,6 @@ namespace DiagramConstructor
                 //IMPORTANT (here method must be after)
                 updateGlobalValuesBeforeRecursion(true, lastBranchShape);
                 coreY -= 0.2;
-                ifWas = false;
             } 
             else if (node.shapeForm == ShapeForm.WHILE)
             {
@@ -146,7 +143,7 @@ namespace DiagramConstructor
                 coreY = y;
             }
             //call with false!!!
-            updateGlobalValuesBeforeRecursion(false, lastBranchShape);
+            updateGlobalValuesBeforeRecursion(false, null);
             return lastBranchShape;
         }
 
@@ -290,7 +287,7 @@ namespace DiagramConstructor
                     }
                     else
                     {
-                        //IMPORTANT rest global shape baccause current shape is connected manualy
+                        //IMPORTANT rest global shape baccause current shape already connected manualy
                         updateGlobalValuesBeforeRecursion(false, null);
                         lastBranchShape = buildTreeV2(node, x, y);
                         shapeManipulator.connectShapes(lastBranchShape.shape, chainParentShape.shape, ShapeForm.LINE, ifElseConnectionType);

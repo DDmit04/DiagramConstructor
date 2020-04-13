@@ -12,7 +12,7 @@ namespace DiagramConstructor
             String code = "";
             if (Configuration.testRun)
             {
-                code = "main(){inta=10;for(inti=0;i<a;i++){if(a*2==4){cout<<'someoutput';}else{cout<<'othetoutput';}}}doSome(inta,intb){if(a>b){while(a!=b){a--;}}else{while(a!=b){b--;}}cout<<'justice';}";
+                code = "main(){for(f){111;}for(f2){222;}}";
 
             }
             else
