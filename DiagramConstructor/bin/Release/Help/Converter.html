@@ -40,6 +40,8 @@
 
     convertBtn.addEventListener('click', () => {
         resultCode.value = codeToConvert.value.replace(/\/\/\S*/g, '');
+        //delete int, double, short, bool, string and arrays of it (incude refs)
+        resultCode.value = resultCode.value.replace(/int\**(\[\d*\])*|double\**(\[\d*\])*|bool\**(\[\d*\])*|long\**(\[\d*\])*|short\**(\[\d*\])*|string\**(\[\d*\])*|float\**(\[\d*\])*/gm, "")
         resultCode.value = resultCode.value.replace(/^using\s*namespace\s*\w*\;/gm, "")
         resultCode.value = resultCode.value.replace(/^\#\w*\s*[\<|\"]\w*\.*\w?[\>|\"]/gm, "")
         resultCode.value = resultCode.value.split('"').join('\'');
