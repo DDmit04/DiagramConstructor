@@ -1,6 +1,8 @@
-# DiagramConstructor
+# DiagramConstructor (1.0.1)
 
 Console С# application creating visio diagrams from C++ code.
+
+[See patch notes](/PATCH_NOTES.md)
 
 # How to use
 
@@ -134,7 +136,7 @@ Console С# application creating visio diagrams from C++ code.
 
 # Unsupported
 
-* "Break" and "continue"
+* "Break" and "continue" - they will be placed as PROCESS blocks
 
 * "switch" - use "else if" instead of it
 
