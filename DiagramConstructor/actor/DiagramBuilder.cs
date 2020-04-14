@@ -36,9 +36,11 @@ namespace DiagramConstructor
             foreach (Method method in codeThree)
             {
 
-                shapeManipulator.addTextField(method.methodSignature, coreX, coreY);
-
-                coreY -= 0.4;
+                if (!method.methodSignature.Equals("main()"))
+                {
+                    shapeManipulator.addTextField(method.methodSignature, coreX, coreY);
+                    coreY -= 0.4;
+                }
 
                 placeBeginShape();
 
@@ -230,7 +232,7 @@ namespace DiagramConstructor
                 else
                 {
                     lastBranchShape = buildTreeV2(currentNode, x, y);
-                    //IMPORTANT (global droped shape is changes every time when recursion call)!!!
+                    //IMPORTANT (false to shift branch) (global droped shape is changes every time when recursion call)!!!
                     updateGlobalValuesBeforeRecursion(false, lastBranchShape);
                     y -= Math.Max(currentNode.childNodes.Count, Math.Max(currentNode.childIfNodes.Count, currentNode.childElseNodes.Count));
                     y -= 0.5;
@@ -292,7 +294,7 @@ namespace DiagramConstructor
                     }
                     else
                     {
-                        //IMPORTANT rest global shape baccause current shape already connected manualy
+                        //IMPORTANT (false to shift branch) rest global shape baccause current shape already connected manualy
                         updateGlobalValuesBeforeRecursion(false, null);
                         lastBranchShape = buildTreeV2(node, x, y);
                         shapeManipulator.connectShapes(lastBranchShape.shape, chainParentShape.shape, ShapeForm.LINE, ifElseConnectionType);
@@ -304,7 +306,7 @@ namespace DiagramConstructor
                     }
                     else
                     {
-                        //IMPORTANT call with false because lastBranchShape isn't common shape so it can not be connected FROM_TOP_TO_BOT
+                        //IMPORTANT (false to shift branch) call with false because lastBranchShape isn't common shape so it can not be connected FROM_TOP_TO_BOT
                         updateGlobalValuesBeforeRecursion(false, lastBranchShape);
                     }
                     coreY -= 0.2;

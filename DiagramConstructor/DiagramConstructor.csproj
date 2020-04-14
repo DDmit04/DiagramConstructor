@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="actor\BuilderUtills.cs" />
+    <Compile Include="actor\CodeAnalyzer.cs" />
     <Compile Include="actor\ShapeManipulator.cs" />
     <Compile Include="App.cs" />
     <Compile Include="Configuration.cs" />

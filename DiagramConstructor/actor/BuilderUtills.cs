@@ -83,6 +83,12 @@ namespace DiagramConstructor.actor
             return shapeConnectionType;
         }
 
+        /// <summary>
+        /// Out return cells aligment from given connection type
+        /// </summary>
+        /// <param name="conectionToType">Out cell aligment for connection to shape</param>
+        /// <param name="conectionFromType">Out cell aligment for connection from shape</param>
+        /// <param name="connectionType">type of shape connection</param>
         public static void getCellsAlignsFromConnectionType(out VisCellIndices conectionToType, out VisCellIndices conectionFromType, ShapeConnectionType connectionType)
         {
             conectionToType = VisCellIndices.visAlignTop;
