@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DiagramConstructor.actor;
+using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
@@ -42,7 +43,6 @@ namespace DiagramConstructor
                 {
                     methods.Add(newMethod);
                 }
-                
             }
             return methods;
         }
@@ -149,7 +149,14 @@ namespace DiagramConstructor
                         String onotherNextBlock = getNextCodeBlock(localCode);
                         if(onotherNextBlock.IndexOf("elseif") == 0)
                         {
-                            onotherNextBlock = localCode;
+                            Regex elseifRegex = new Regex(@"(elseif\(\S+\){\S+;})+(else{\S+;})*");
+                            Match match = elseifRegex.Match(localCode);
+                            if(match.Success)
+                            {
+                                onotherNextBlock = match.Value;
+                                nodeCode = replaceFirst(nodeCode, onotherNextBlock, "");
+                            }
+                            localCode = elseifRegex.Replace(localCode, "", 1);
                         }
                         if (onotherNextBlock.IndexOf("else") == 0)
                         {
@@ -197,22 +204,18 @@ namespace DiagramConstructor
                             break;
                         }
                         copy = replaceFirst(copy, nodeCodeLine, "");
-                        if (nodeCodeLine.IndexOf("cin>>") == 0 || nodeCodeLine.IndexOf("cin»") == 0)
+                        if (nodeCodeLine.IndexOf("cin>>") == 0 
+                            || nodeCodeLine.IndexOf("cin»") == 0 
+                            || nodeCodeLine.IndexOf("cout<<") == 0 
+                            || nodeCodeLine.IndexOf("cout«") == 0)
                         {
-                            nodeCodeLine = nodeCodeLine.Replace("cin>>", "Ввод ");
-                            nodeCodeLine = nodeCodeLine.Replace("cin»", "Ввод ");
-                            nodeCodeLine = nodeCodeLine.Replace("«endl", "");
-                            nodeCodeLine = nodeCodeLine.Replace("<<endl", "");
+                            nodeCodeLine = nodeCodeLine.Replace("cin>>", "Ввод ").Replace("cin»", "Ввод ");
+                            nodeCodeLine = nodeCodeLine.Replace("cout<<", "Вывод ").Replace("cout«", "Вывод ");
+                            nodeCodeLine = nodeCodeLine.Replace("<<endl", "").Replace("«endl", "");
+                            nodeCodeLine = nodeCodeLine.Replace(">>", "").Replace("<<", "");
+                            nodeCodeLine = nodeCodeLine.Replace("»", "").Replace("«", "");
                             node.shapeForm = ShapeForm.IN_OUT_PUT;
 
-                        }
-                        else if(nodeCodeLine.IndexOf("cout<<") == 0 || nodeCodeLine.IndexOf("cout«") == 0)
-                        {
-                            nodeCodeLine = nodeCodeLine.Replace("cout<<", "Вывод ");
-                            nodeCodeLine = nodeCodeLine.Replace("cout«", "Ввод ");
-                            nodeCodeLine = nodeCodeLine.Replace("«endl", "");
-                            nodeCodeLine = nodeCodeLine.Replace("<<endl", "");
-                            node.shapeForm = ShapeForm.IN_OUT_PUT;
                         }
                         else if(methodSingleCall.IsMatch(nodeCodeLine) 
                             || methodReturnCall.IsMatch(nodeCodeLine) 

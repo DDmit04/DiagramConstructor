@@ -133,11 +133,11 @@ namespace DiagramConstructor.actor
         /// </summary>
         /// <param name="node">parent node</param>
         /// <returns>max num of nodes</returns>
-        public static int calcStatementHeight(Node node)
+        public static double calcStatementHeight(Node node)
         {
-            int commonBrannchMaxLength = 0;
-            int elseBrannchMaxLength = 0;
-            int ifBrannchMaxLength = 0;
+            double commonBrannchMaxLength = 0;
+            double elseBrannchMaxLength = 0;
+            double ifBrannchMaxLength = 0;
             if (node.childNodes.Count != 0)
             {
                 foreach (Node n in node.childNodes)
@@ -162,7 +162,12 @@ namespace DiagramConstructor.actor
                     elseBrannchMaxLength += calcStatementHeight(n);
                 }
             }
-            return Math.Max(commonBrannchMaxLength, Math.Max(elseBrannchMaxLength, ifBrannchMaxLength));
+            double result = Math.Max(commonBrannchMaxLength, Math.Max(elseBrannchMaxLength, ifBrannchMaxLength));
+            if(node.shapeForm == ShapeForm.WHILE)
+            {
+                result += 0.2;
+            }
+            return result;
         }
 
     }
