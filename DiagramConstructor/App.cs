@@ -21,8 +21,8 @@ namespace DiagramConstructor
             Console.WriteLine("Parse code...");
             List<Method> parsedMethods = codeParser.ParseCode();
 
-            //Console.WriteLine("Anylize...");
-            //parsedMethods = codeAnalyzer.analyzeMethods(parsedMethods);
+            Console.WriteLine("Anylize...");
+            parsedMethods = codeAnalyzer.analyzeMethods(parsedMethods);
 
             Console.WriteLine("Build diagram...");
             DiagramBuilder diagramBuider = new DiagramBuilder(parsedMethods);

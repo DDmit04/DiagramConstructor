@@ -12,7 +12,7 @@ namespace DiagramConstructor
             String code = "";
             if (Configuration.testRun)
             {
-                code = "main(){while(awd){wad;}awd;}";
+                code = "main(){if(awd){inta=0;intb=0;}}";
             }
             else
             {
