@@ -12,11 +12,120 @@ namespace DiagramConstructor.actor
 
         public List<Method> analyzeMethods(List<Method> methodsToAnylize)
         {
+            int methodArgsIndex = -1;
             foreach (Method method in methodsToAnylize)
             {
-                analyzeNodes(method.methodNodes);
+                Regex arraySizeRegexp = new Regex(@"(\[\d*\])*");
+                method.methodSignature = arraySizeRegexp.Replace(method.methodSignature, "", 1);
+                methodArgsIndex = method.methodSignature.IndexOf('(');
+                if (methodArgsIndex != -1)
+                {
+                    method.methodSignature = method.methodSignature.Insert(methodArgsIndex, " ");
+                }
+                anylizeNodesTexts(method.methodNodes);
+                compareNodes(method.methodNodes);
             }
             return methodsToAnylize;
+        }
+
+        public String anylizeProcessNodeText(String startText)
+        {
+            int equalSignIndex = startText.IndexOf('=');
+            if (equalSignIndex != -1)
+            {
+                startText = startText.Insert(equalSignIndex, " ");
+                equalSignIndex = startText.IndexOf('=');
+                startText = startText.Insert(equalSignIndex + 1, " ");
+            }
+            return startText;
+        }
+
+        public bool isUnimportantOutput(String startText)
+        {
+            Regex unimportantOutput = new Regex(@"Вывод\s*\'\S*\'");
+
+            return unimportantOutput.IsMatch(startText) && startText.IndexOf(',') == -1;
+        }
+
+        public String anylizeForNodeText(String startText)
+        {
+            //exampe - startText = 'i=0;i<10;i++'
+            int index = startText.LastIndexOf(';');
+            // i++
+            String incrementText = startText.Substring(index + 1);
+            // i
+            Regex incrementName = new Regex(@"(\d*|\w*)[^\W*]");
+            // ++
+            incrementText = incrementName.Replace(incrementText, "", 1);
+            // ++ (in case of incrementText = '+=10' incrementAction = '+=')
+            String incrementAction = incrementText.Substring(0, 2);
+            // '' (in case of incrementText = '+=10' incrementArg = '10')
+            String incrementArg = incrementText.Replace(incrementAction, "");
+
+            if(incrementAction.Equals("++"))
+            {
+                incrementText = "1";
+            }
+            else if (incrementAction.Equals("--"))
+            {
+                incrementText = "-1";
+            }
+            else if (incrementAction.Equals("+="))
+            {
+                incrementText = incrementArg;
+            }
+            else if (incrementAction.Equals("-=") )
+            {
+                incrementText = "-" + incrementArg;
+            }
+            else if (incrementAction.Equals("*="))
+            {
+                incrementText = "*" + incrementArg;
+            }
+            else if (incrementAction.Equals("/="))
+            {
+                incrementText = "/" + incrementArg;
+            }
+
+            startText = startText.Substring(0, index);
+            startText = startText.Replace(";", " (" + incrementText + ") ");
+            return startText;
+        }
+
+        public List<Node> anylizeNodesTexts (List<Node> nodesToAnylize)
+        {
+            Node currentNode = nodesToAnylize[0];
+            for (int i = nodesToAnylize.Count - 1; i >= 0; i--)
+            {
+                currentNode = nodesToAnylize[i];
+                if (currentNode.shapeForm == ShapeForm.PROCESS)
+                {
+                    currentNode.nodeText = anylizeProcessNodeText(currentNode.nodeText);
+                }
+                else if (currentNode.shapeForm == ShapeForm.FOR)
+                {
+                    currentNode.nodeText = anylizeForNodeText(currentNode.nodeText);
+                }
+                else if (currentNode.shapeForm == ShapeForm.IN_OUT_PUT && isUnimportantOutput(currentNode.nodeText))
+                {
+                    nodesToAnylize.RemoveAt(i);
+                    continue;
+                }
+
+                if (currentNode.childNodes.Count != 0)
+                {
+                    currentNode.childNodes = compareNodes(currentNode.childNodes);
+                }
+                if (currentNode.childIfNodes.Count != 0)
+                {
+                    currentNode.childIfNodes = compareNodes(currentNode.childIfNodes);
+                }
+                if (currentNode.childElseNodes.Count != 0)
+                {
+                    currentNode.childElseNodes = compareNodes(currentNode.childElseNodes);
+                }
+            }
+            return nodesToAnylize;
         }
 
         /// <summary>
@@ -24,7 +133,7 @@ namespace DiagramConstructor.actor
         /// </summary>
         /// <param name="nodesToAnylize">nodes for compare</param>
         /// <returns>compared nodes</returns>
-        public List<Node> analyzeNodes(List<Node> nodesToAnylize)
+        public List<Node> compareNodes(List<Node> nodesToAnylize)
         {
             Node lastNode = null;
             Node currentNode = null;
@@ -35,15 +144,15 @@ namespace DiagramConstructor.actor
                 currentNode = nodesToAnylize[i];
                 if (currentNode.childNodes.Count != 0)
                 {
-                    currentNode.childNodes = analyzeNodes(currentNode.childNodes);
+                    currentNode.childNodes = compareNodes(currentNode.childNodes);
                 }
                 if (currentNode.childIfNodes.Count != 0)
                 {
-                    currentNode.childIfNodes = analyzeNodes(currentNode.childIfNodes);
+                    currentNode.childIfNodes = compareNodes(currentNode.childIfNodes);
                 }
                 if (currentNode.childElseNodes.Count != 0)
                 {
-                    currentNode.childElseNodes = analyzeNodes(currentNode.childElseNodes);
+                    currentNode.childElseNodes = compareNodes(currentNode.childElseNodes);
                 }
                 if (i == nodesToAnylize.Count - 1)
                 {

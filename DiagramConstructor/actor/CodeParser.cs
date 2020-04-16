@@ -194,6 +194,7 @@ namespace DiagramConstructor
                     Regex methodSingleCall = new Regex(@"(\S*)\((\S*)\)");
                     Regex methodReturnCall = new Regex(@"(\S*)(\=)(\S*)\((\S*)\)");
                     Regex methodCallOnObject = new Regex(@"\S*\=\S*\.\S*\(\S*\)");
+                    Regex unimportantOutput = new Regex(@"\'\S*\'\,*");
                     String copy = nextCodeBlock;
                     while (!codeIsEmptyMarcks(copy)) {
                         Node node = new Node();
@@ -212,8 +213,9 @@ namespace DiagramConstructor
                             nodeCodeLine = nodeCodeLine.Replace("cin>>", "Ввод ").Replace("cin»", "Ввод ");
                             nodeCodeLine = nodeCodeLine.Replace("cout<<", "Вывод ").Replace("cout«", "Вывод ");
                             nodeCodeLine = nodeCodeLine.Replace("<<endl", "").Replace("«endl", "");
-                            nodeCodeLine = nodeCodeLine.Replace(">>", "").Replace("<<", "");
-                            nodeCodeLine = nodeCodeLine.Replace("»", "").Replace("«", "");
+                            nodeCodeLine = nodeCodeLine.Replace(">>", ", ").Replace("<<", ", ");
+                            nodeCodeLine = nodeCodeLine.Replace("»", ", ").Replace("«", ", ");
+                            nodeCodeLine = unimportantOutput.Replace(nodeCodeLine, "");
                             node.shapeForm = ShapeForm.IN_OUT_PUT;
 
                         }

@@ -12,7 +12,7 @@ namespace DiagramConstructor
             String code = "";
             if (Configuration.testRun)
             {
-                code = "main(){if(awd){inta=0;intb=0;}}";
+                code = "main(){cout<<'lul'<<res;for(i=0;i<0;i+=10){ed;}}";
             }
             else
             {

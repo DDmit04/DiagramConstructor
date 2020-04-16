@@ -8,7 +8,7 @@ namespace DiagramConstructor
 {
     class Method
     {
-        public String methodSignature { get; }
+        public String methodSignature { get; set; }
         public List<Node> methodNodes { get; }
 
         public Method(String methodSignature, List<Node> methodNodes)

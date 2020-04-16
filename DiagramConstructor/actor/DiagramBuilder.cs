@@ -93,7 +93,6 @@ namespace DiagramConstructor
         /// </summary>
         public void placeEndShape(List<Node> mainBranch)
         {
-            coreY -= 0.2;
             ShapeWrapper endShape = shapeManipulator.dropShapeV2(ShapeForm.BEGIN, "Конец", coreX, coreY);
             ShapeConnectionType shapeConnection = BuilderUtills.defineConnectionType(globalLastDropedShapeV2, endShape, globalIsSameBranch);
             shapeManipulator.connectShapes(globalLastDropedShapeV2.shape, endShape.shape, ShapeForm.LINE, shapeConnection);
