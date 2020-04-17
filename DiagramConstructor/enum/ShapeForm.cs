@@ -22,6 +22,7 @@ namespace DiagramConstructor
         TEXT_FIELD, 
         SMALL_TEXT_FIELD, 
         INVISIBLE_BLOCK,
-        LINE
+        LINE,
+        DO
     }
 }

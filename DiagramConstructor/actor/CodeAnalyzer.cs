@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace DiagramConstructor.actor
 {
     class CodeAnalyzer
     {
 
+        /// <summary>
+        /// Modificate all method nodes
+        /// </summary>
+        /// <param name="methodsToAnylize">list of methods to modificate</param>
+        /// <returns>list of modificated methods</returns>
         public List<Method> analyzeMethods(List<Method> methodsToAnylize)
         {
             int methodArgsIndex = -1;
@@ -28,76 +30,18 @@ namespace DiagramConstructor.actor
             return methodsToAnylize;
         }
 
-        public String anylizeProcessNodeText(String startText)
-        {
-            int equalSignIndex = startText.IndexOf('=');
-            if (equalSignIndex != -1)
-            {
-                startText = startText.Insert(equalSignIndex, " ");
-                equalSignIndex = startText.IndexOf('=');
-                startText = startText.Insert(equalSignIndex + 1, " ");
-            }
-            return startText;
-        }
-
-        public bool isUnimportantOutput(String startText)
-        {
-            Regex unimportantOutput = new Regex(@"Вывод\s*\'\S*\'");
-
-            return unimportantOutput.IsMatch(startText) && startText.IndexOf(',') == -1;
-        }
-
-        public String anylizeForNodeText(String startText)
-        {
-            //exampe - startText = 'i=0;i<10;i++'
-            int index = startText.LastIndexOf(';');
-            // i++
-            String incrementText = startText.Substring(index + 1);
-            // i
-            Regex incrementName = new Regex(@"(\d*|\w*)[^\W*]");
-            // ++
-            incrementText = incrementName.Replace(incrementText, "", 1);
-            // ++ (in case of incrementText = '+=10' incrementAction = '+=')
-            String incrementAction = incrementText.Substring(0, 2);
-            // '' (in case of incrementText = '+=10' incrementArg = '10')
-            String incrementArg = incrementText.Replace(incrementAction, "");
-
-            if(incrementAction.Equals("++"))
-            {
-                incrementText = "1";
-            }
-            else if (incrementAction.Equals("--"))
-            {
-                incrementText = "-1";
-            }
-            else if (incrementAction.Equals("+="))
-            {
-                incrementText = incrementArg;
-            }
-            else if (incrementAction.Equals("-=") )
-            {
-                incrementText = "-" + incrementArg;
-            }
-            else if (incrementAction.Equals("*="))
-            {
-                incrementText = "*" + incrementArg;
-            }
-            else if (incrementAction.Equals("/="))
-            {
-                incrementText = "/" + incrementArg;
-            }
-
-            startText = startText.Substring(0, index);
-            startText = startText.Replace(";", " (" + incrementText + ") ");
-            return startText;
-        }
-
-        public List<Node> anylizeNodesTexts (List<Node> nodesToAnylize)
+        /// <summary>
+        /// Modificate or delete node of it's text
+        /// </summary>
+        /// <param name="nodesToAnylize">nodes to modificate or delete</param>
+        /// <returns>list of modificated nodes</returns>
+        private List<Node> anylizeNodesTexts(List<Node> nodesToAnylize)
         {
             Node currentNode = nodesToAnylize[0];
             for (int i = nodesToAnylize.Count - 1; i >= 0; i--)
             {
                 currentNode = nodesToAnylize[i];
+
                 if (currentNode.shapeForm == ShapeForm.PROCESS)
                 {
                     currentNode.nodeText = anylizeProcessNodeText(currentNode.nodeText);
@@ -105,6 +49,11 @@ namespace DiagramConstructor.actor
                 else if (currentNode.shapeForm == ShapeForm.FOR)
                 {
                     currentNode.nodeText = anylizeForNodeText(currentNode.nodeText);
+                } 
+                else if(currentNode.shapeForm == ShapeForm.WHILE || currentNode.shapeForm == ShapeForm.IF)
+                {
+                    currentNode.nodeText = currentNode.nodeText.Replace("||", "or").Replace("|", "or");
+                    currentNode.nodeText = currentNode.nodeText.Replace("&&", "and").Replace("&", "and");
                 }
                 else if (currentNode.shapeForm == ShapeForm.IN_OUT_PUT && isUnimportantOutput(currentNode.nodeText))
                 {
@@ -114,15 +63,15 @@ namespace DiagramConstructor.actor
 
                 if (currentNode.childNodes.Count != 0)
                 {
-                    currentNode.childNodes = compareNodes(currentNode.childNodes);
+                    currentNode.childNodes = anylizeNodesTexts(currentNode.childNodes);
                 }
                 if (currentNode.childIfNodes.Count != 0)
                 {
-                    currentNode.childIfNodes = compareNodes(currentNode.childIfNodes);
+                    currentNode.childIfNodes = anylizeNodesTexts(currentNode.childIfNodes);
                 }
                 if (currentNode.childElseNodes.Count != 0)
                 {
-                    currentNode.childElseNodes = compareNodes(currentNode.childElseNodes);
+                    currentNode.childElseNodes = anylizeNodesTexts(currentNode.childElseNodes);
                 }
             }
             return nodesToAnylize;
@@ -132,8 +81,8 @@ namespace DiagramConstructor.actor
         /// Compare short text (PROCESS and IN_OUT_PUT) blocks
         /// </summary>
         /// <param name="nodesToAnylize">nodes for compare</param>
-        /// <returns>compared nodes</returns>
-        public List<Node> compareNodes(List<Node> nodesToAnylize)
+        /// <returns>list of compared nodes</returns>
+        private List<Node> compareNodes(List<Node> nodesToAnylize)
         {
             Node lastNode = null;
             Node currentNode = null;
@@ -190,6 +139,86 @@ namespace DiagramConstructor.actor
                 }
             }
             return nodesToAnylize;
+        }
+
+        /// <summary>
+        /// Modificate text in PROCESS shape
+        /// </summary>
+        /// <param name="startText">text to anylize</param>
+        /// <returns>modificated text</returns>
+        private String anylizeProcessNodeText(String startText)
+        {
+            int equalSignIndex = startText.IndexOf('=');
+            if (equalSignIndex != -1)
+            {
+                startText = startText.Insert(equalSignIndex, " ");
+                equalSignIndex = startText.IndexOf('=');
+                startText = startText.Insert(equalSignIndex + 1, " ");
+            }
+            return startText;
+        }
+
+        /// <summary>
+        /// Check is console output just constant string
+        /// </summary>
+        /// <param name="startText">text to anylize</param>
+        /// <returns>is console output just constant string</returns>
+        private bool isUnimportantOutput(String startText)
+        {
+            Regex unimportantOutput = new Regex(@"Вывод\s*\'\S*\'");
+
+            return unimportantOutput.IsMatch(startText) && startText.IndexOf(',') == -1;
+        }
+
+
+        /// <summary>
+        /// Modificate text in FOR shape
+        /// </summary>
+        /// <param name="startText">text to anylize</param>
+        /// <returns>modificated text</returns>
+        private String anylizeForNodeText(String startText)
+        {
+            //exampe - startText = 'i=0;i<10;i++'
+            int index = startText.LastIndexOf(';');
+            // i++
+            String incrementText = startText.Substring(index + 1);
+            // i
+            Regex incrementName = new Regex(@"(\d*|\w*)[^\W*]");
+            // ++
+            incrementText = incrementName.Replace(incrementText, "", 1);
+            // ++ (in case of incrementText = '+=10' incrementAction = '+=')
+            String incrementAction = incrementText.Substring(0, 2);
+            // '' (in case of incrementText = '+=10' incrementArg = '10')
+            String incrementArg = incrementText.Replace(incrementAction, "");
+
+            if (incrementAction.Equals("++"))
+            {
+                incrementText = "1";
+            }
+            else if (incrementAction.Equals("--"))
+            {
+                incrementText = "-1";
+            }
+            else if (incrementAction.Equals("+="))
+            {
+                incrementText = incrementArg;
+            }
+            else if (incrementAction.Equals("-="))
+            {
+                incrementText = "-" + incrementArg;
+            }
+            else if (incrementAction.Equals("*="))
+            {
+                incrementText = "*" + incrementArg;
+            }
+            else if (incrementAction.Equals("/="))
+            {
+                incrementText = "/" + incrementArg;
+            }
+
+            startText = startText.Substring(0, index);
+            startText = startText.Replace(";", " (" + incrementText + ") ");
+            return startText;
         }
 
     }

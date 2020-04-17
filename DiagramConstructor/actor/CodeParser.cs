@@ -11,6 +11,11 @@ namespace DiagramConstructor
 
         private List<Node> methodNodes;
 
+        private Regex methodSingleCall = new Regex(@"(\S*)\((\S*)\)");
+        private Regex methodReturnCall = new Regex(@"(\S*)(\=)(\S*)\((\S*)\)");
+        private Regex methodCallOnObject = new Regex(@"\S*\=\S*\.\S*\(\S*\)");
+        private Regex unimportantOutput = new Regex(@"\'\S*\'\,*");
+
         public CodeParser(String codeToParse)
         {
             this.codeToParse = codeToParse;
@@ -52,7 +57,7 @@ namespace DiagramConstructor
         /// </summary>
         /// <param name="code">string to check</param>
         /// <returns> string surrounded by {} and contains (if | else | while | ...) as first operand</returns>
-        public bool nextCodeIsSimple(String code)
+        private bool nextCodeIsSimple(String code)
         {
             bool langStateIsNearToBegin = code.IndexOf("if(") == 1 
                 || code.IndexOf("while(") == 1 
@@ -67,7 +72,7 @@ namespace DiagramConstructor
         /// </summary>
         /// <param name="code">string to modify</param>
         /// <returns>modified string</returns> 
-        public String checkCodeSimplenes(String code)
+        private String checkCodeSimplenes(String code)
         {
             if (nextCodeIsSimple(code))
             {
@@ -82,7 +87,7 @@ namespace DiagramConstructor
         /// </summary>
         /// <param name="code">code to search blocks</param>
         /// <returns>string from begin to index of closing } (count of { and } in result string is equal)</returns>
-        public String getNextCodeBlock(String code)
+        private String getNextCodeBlock(String code)
         {
             if (code[0].Equals('{') && code[code.Length - 1].Equals('}'))
             {
@@ -122,7 +127,7 @@ namespace DiagramConstructor
         /// </summary>
         /// <param name="nodeCode">code to convert</param>
         /// <returns>list of code ASTs</returns>
-        public List<Node> parseNode(String nodeCode)
+        private List<Node> parseNode(String nodeCode)
         {
             List<Node> resultNodes = new List<Node>();
             int nextLineDivider = 0;
@@ -156,7 +161,6 @@ namespace DiagramConstructor
                                 onotherNextBlock = match.Value;
                                 nodeCode = replaceFirst(nodeCode, onotherNextBlock, "");
                             }
-                            localCode = elseifRegex.Replace(localCode, "", 1);
                         }
                         if (onotherNextBlock.IndexOf("else") == 0)
                         {
@@ -189,12 +193,30 @@ namespace DiagramConstructor
                     newNode.childNodes = parseNode(nextCodeBlock.Substring(nextLineDivider));
                     resultNodes.Add(newNode);
                 } 
+                else if(nextCodeBlock.IndexOf("do{") == 0)
+                {
+                    String lastDoWhileNodeText = "";
+                    nextLineDivider = nextCodeBlock.IndexOf('{');
+                    int lastDoWhileNodeEndIndex = nodeCode.Substring(nextCodeBlock.Length).IndexOf(';') + 1;
+                    String lastDoWhileNodeCode = nodeCode.Substring(nextCodeBlock.Length, lastDoWhileNodeEndIndex);
+                    newNode.childNodes = parseNode(nextCodeBlock.Substring(nextLineDivider));
+
+                    lastDoWhileNodeText = lastDoWhileNodeCode;
+                    lastDoWhileNodeText = lastDoWhileNodeText.Replace("while(", "");
+                    lastDoWhileNodeText = lastDoWhileNodeText.Replace(");", "");
+
+                    Node lastDoWhileNode = new Node();
+                    lastDoWhileNode.nodeText = lastDoWhileNodeText;
+                    lastDoWhileNode.shapeForm = ShapeForm.IF;
+                    newNode.childNodes.Add(lastDoWhileNode);
+
+                    newNode.shapeForm = ShapeForm.DO;
+                    resultNodes.Add(newNode);
+
+                    nextCodeBlock += lastDoWhileNodeCode;
+                }
                 else
                 {
-                    Regex methodSingleCall = new Regex(@"(\S*)\((\S*)\)");
-                    Regex methodReturnCall = new Regex(@"(\S*)(\=)(\S*)\((\S*)\)");
-                    Regex methodCallOnObject = new Regex(@"\S*\=\S*\.\S*\(\S*\)");
-                    Regex unimportantOutput = new Regex(@"\'\S*\'\,*");
                     String copy = nextCodeBlock;
                     while (!codeIsEmptyMarcks(copy)) {
                         Node node = new Node();
@@ -248,7 +270,7 @@ namespace DiagramConstructor
         /// </summary>
         /// <param name="text">text to check</param>
         /// <returns>Is code contains only { and } chars</returns>
-        public bool codeIsEmptyMarcks(String text)
+        private bool codeIsEmptyMarcks(String text)
         {
             Regex regex = new Regex(@"(\w*\;)");
             return !regex.IsMatch(text);
@@ -261,7 +283,7 @@ namespace DiagramConstructor
         /// <param name="textToReplace">text for replace</param>
         /// <param name="replace">text to replace </param>
         /// <returns>modifyed text</returns>
-        public String replaceFirst(String text, String textToReplace, String replace)
+        private String replaceFirst(String text, String textToReplace, String replace)
         {
             Regex regex = new Regex(Regex.Escape(textToReplace));
             text = regex.Replace(text, replace, 1);
@@ -273,7 +295,7 @@ namespace DiagramConstructor
         /// </summary>
         /// <param name="line">code to check</param>
         /// <returns>bool</returns>
-        public bool lineIsSimple(String line)
+        private bool lineIsSimple(String line)
         {
             return !(line.IndexOf("if(") == 0
                 || line.IndexOf("for(") == 0

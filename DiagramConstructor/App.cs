@@ -1,10 +1,6 @@
 ﻿using DiagramConstructor.actor;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DiagramConstructor
 {
@@ -16,7 +12,7 @@ namespace DiagramConstructor
             CodeParser codeParser = new CodeParser(code);
             CodeAnalyzer codeAnalyzer = new CodeAnalyzer();
 
-            Console.WriteLine("Staring work");
+            Console.WriteLine("\nStaring work");
 
             Console.WriteLine("Parse code...");
             List<Method> parsedMethods = codeParser.ParseCode();

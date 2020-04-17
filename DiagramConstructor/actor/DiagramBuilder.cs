@@ -71,7 +71,7 @@ namespace DiagramConstructor
         /// <summary>
         /// Place first method shape (begin)
         /// </summary>
-        public void placeBeginShape()
+        private void placeBeginShape()
         {
             globalLastDropedShapeV2 = shapeManipulator.dropShapeV2(ShapeForm.BEGIN, "Начало", coreX, coreY);
             coreY -= 0.95;
@@ -82,7 +82,7 @@ namespace DiagramConstructor
         /// </summary>
         /// <param name="sameBranch">new inSameBranch value</param>
         /// <param name="lastBranchShape">new globalLastDropedShapeV2 value</param>
-        public void updateGlobalValuesBeforeRecursion(bool sameBranch, ShapeWrapper lastBranchShape)
+        private void updateGlobalValuesBeforeRecursion(bool sameBranch, ShapeWrapper lastBranchShape)
         {
             globalIsSameBranch = sameBranch;
             globalLastDropedShapeV2 = lastBranchShape;
@@ -91,7 +91,7 @@ namespace DiagramConstructor
         /// <summary>
         /// Place last method shape (end)
         /// </summary>
-        public void placeEndShape(List<Node> mainBranch)
+        private void placeEndShape(List<Node> mainBranch)
         {
             ShapeWrapper endShape = shapeManipulator.dropShapeV2(ShapeForm.BEGIN, "Конец", coreX, coreY);
             ShapeConnectionType shapeConnection = BuilderUtills.defineConnectionType(globalLastDropedShapeV2, endShape, globalIsSameBranch);
@@ -105,7 +105,7 @@ namespace DiagramConstructor
         /// <param name="x">new shape x</param>
         /// <param name="y">new shape y</param>
         /// <returns>last places shape in nodes AST branch</returns>
-        public ShapeWrapper buildTreeV2(Node node, double x, double y)
+        private ShapeWrapper buildTreeV2(Node node, double x, double y)
         {
             ShapeWrapper currentNodeShape = shapeManipulator.dropShapeV2(node, x, y);
             if (globalLastDropedShapeV2 != null)
@@ -156,7 +156,7 @@ namespace DiagramConstructor
         /// <param name="x">new branch x</param>
         /// <param name="y">new branch y</param>
         /// <returns>last shape in branch</returns>
-        public ShapeWrapper startWhileBranch(Node node, ShapeWrapper currentNodeShape, double x, double y)
+        private ShapeWrapper startWhileBranch(Node node, ShapeWrapper currentNodeShape, double x, double y)
         {
             shapeManipulator.adSmallTextField("Да", x + 0.38, y + 0.5);
             shapeManipulator.adSmallTextField("Нет", x + 0.7, y + 1.5);
@@ -173,7 +173,7 @@ namespace DiagramConstructor
         /// <param name="x">new branch x</param>
         /// <param name="y">new branch y</param>
         /// <returns>last shape in branch (in this case - invisible block connecting if and else branches)</returns>
-        public ShapeWrapper startIfElseBranch(Node node, ShapeWrapper currentNodeShape, double x, double y)
+        private ShapeWrapper startIfElseBranch(Node node, ShapeWrapper currentNodeShape, double x, double y)
         {
             shapeManipulator.adSmallTextField("Да", x - 0.7, y + 1.2);
             shapeManipulator.adSmallTextField("Нет", x + 0.7, y + 1.2);
@@ -209,7 +209,7 @@ namespace DiagramConstructor
         /// <param name="x">branch x</param>
         /// <param name="y">branch y</param>
         /// <returns>last branch shape</returns>
-        public ShapeWrapper buildTreeBranchV2(Node node, ShapeWrapper chainParentShape, double x, double y)
+        private ShapeWrapper buildTreeBranchV2(Node node, ShapeWrapper chainParentShape, double x, double y)
         {
             ShapeWrapper lastBranchShape = null;
             ShapeWrapper prevShape = chainParentShape;
@@ -260,7 +260,7 @@ namespace DiagramConstructor
         /// <param name="x">branch x</param>
         /// <param name="y">branch y</param>
         /// <returns>last branch shape</returns>
-        public ShapeWrapper buildIfElseTreeBranchV2(List<Node> nodes, ShapeWrapper chainParentShape, ShapeConnectionType ifElseConnectionType, double x, double y)
+        private ShapeWrapper buildIfElseTreeBranchV2(List<Node> nodes, ShapeWrapper chainParentShape, ShapeConnectionType ifElseConnectionType, double x, double y)
         {
             ShapeWrapper lastBranchShape = null;
             for (int i = 0; i < nodes.Count; i++)

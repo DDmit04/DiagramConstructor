@@ -9,10 +9,14 @@ namespace DiagramConstructor
     {
         static void Main(string[] args)
         {
+
+            Console.WriteLine("DIAGRAM CONSTRUCTOR 1.0.2.");
+            Console.WriteLine("Author: Dmitrochenkov Daniil.\n\n");
+
             String code = "";
             if (Configuration.testRun)
             {
-                code = "main(){cout<<'lul'<<res;for(i=0;i<0;i+=10){ed;}}";
+                code = "main(){do{while(awd){daw;awd;}}while(awd);}";
             }
             else
             {

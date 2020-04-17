@@ -39,6 +39,7 @@
     var resultCode = document.getElementById('resultCode');
 
     convertBtn.addEventListener('click', () => {
+
         //delete comments
         resultCode.value = codeToConvert.value.replace(/\/\/(\s*\S*)*$\n/g, '')
         //delete "using namespace"
@@ -46,12 +47,15 @@
         //delete processor directives
         resultCode.value = resultCode.value.replace(/^\#\w*\s*[\<|\"]\w*\.*\w?[\>|\"]/gm, "")
 
+        //delete arrays init (any demention)
+        resultCode.value = resultCode.value.replace(/(const)*\s*(void|char|int|double|bool|long|short|string|String|float)+\s*\**\s*\S*\s*(\[\d*\])*\=+\s*\{(\{*((\d*|\w*|"|')\,*\s*)*\}*\,*)*\}\s*;+/gm, "")
+
         //delete init premitive values and arrays of them (incude refs)
-        resultCode.value = resultCode.value.replace(/(const)*\s*(void|char|int|double|bool|long|short|string|String|float)+\s*\**\s*\S*\s*(\[\d*\])*(\=+\s*0|"\s*"|'\s*')+;/gm, "")
+        resultCode.value = resultCode.value.replace(/(const)*\s*[^for(]\s*(void|char|int|double|bool|long|short|string|String|float)+\s*\**\s*\S*\s*(\[\d*\])*(\=+\s*0|"\s*"|'\s*')+;/gm, "")
         //delete premitive data type strings
         resultCode.value = resultCode.value.replace(/(const)*(void|int|char|double|long|short|string|String|float)/gm, "")
         //delete <namespace>::
-        resultCode.value = resultCode.value.replace(/\w+::/gm, "")
+        resultCode.value = resultCode.value.replace(/(\d*|\w*)+::/gm, "")
 
         //global trim
         resultCode.value = resultCode.value.replace(/\r|\n|\t/g, '');
