@@ -31,6 +31,7 @@ namespace DiagramConstructor
             Method newMethod = new Method("no method!", new List<Node>());
             while (!codeIsEmptyMarcks(codeToParse))
             {
+
                 nextMethodCode = getNextCodeBlock(codeToParse);
                 methodCodeBegin = nextMethodCode.IndexOf('{');
                 methodBlock = nextMethodCode.Substring(methodCodeBegin);
