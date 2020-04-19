@@ -137,8 +137,8 @@ namespace DiagramConstructor
                 {
                     nextLineDivider = nextCodeBlock.IndexOf('{');
                     nodeCodeLine = nextCodeBlock.Substring(0, nextLineDivider);
-                    nodeCodeLine = nodeCodeLine.Replace("if(", "");
-                    nodeCodeLine = nodeCodeLine.Replace(")", "");
+                    nodeCodeLine = replaceFirst(nodeCodeLine, "if(", ""); 
+                    nodeCodeLine = replaceFirst(nodeCodeLine, ")", "");
                     newNode.nodeText = nodeCodeLine;
                     newNode.shapeForm = ShapeForm.IF;
 
@@ -159,7 +159,7 @@ namespace DiagramConstructor
                                 nodeCode = replaceFirst(nodeCode, onotherNextBlock, "");
                             }
                         }
-                        if (onotherNextBlock.IndexOf("else") == 0)
+                        if (onotherNextBlock.IndexOf("else") == 0 || onotherNextBlock.IndexOf("}else") == 0)
                         {
                             nodeCode = nodeCode.Replace(onotherNextBlock, "");
                             onotherNextBlock = replaceFirst(onotherNextBlock, "else", "");
@@ -172,8 +172,8 @@ namespace DiagramConstructor
                 {
                     nextLineDivider = nextCodeBlock.IndexOf('{');
                     nodeCodeLine = nextCodeBlock.Substring(0, nextLineDivider);
-                    nodeCodeLine = nodeCodeLine.Replace("for(", "");
-                    nodeCodeLine = nodeCodeLine.Replace(")", "");
+                    nodeCodeLine = replaceFirst(nodeCodeLine, "for(", "");
+                    nodeCodeLine = replaceFirst(nodeCodeLine, ")", "");
                     newNode.nodeText = nodeCodeLine;
                     newNode.shapeForm = ShapeForm.FOR;
                     newNode.childNodes = parseNode(nextCodeBlock.Substring(nextLineDivider));
@@ -184,7 +184,7 @@ namespace DiagramConstructor
                     nextLineDivider = nextCodeBlock.IndexOf('{');
                     nodeCodeLine = nextCodeBlock.Substring(0, nextLineDivider);
                     nodeCodeLine = nodeCodeLine.Replace("while(", "");
-                    nodeCodeLine = nodeCodeLine.Replace(")", "");
+                    nodeCodeLine = replaceFirst(nodeCodeLine, ")", "");
                     newNode.nodeText = nodeCodeLine;
                     newNode.shapeForm = ShapeForm.WHILE;
                     newNode.childNodes = parseNode(nextCodeBlock.Substring(nextLineDivider));
@@ -200,7 +200,7 @@ namespace DiagramConstructor
 
                     lastDoWhileNodeText = lastDoWhileNodeCode;
                     lastDoWhileNodeText = lastDoWhileNodeText.Replace("while(", "");
-                    lastDoWhileNodeText = lastDoWhileNodeText.Replace(");", "");
+                    nodeCodeLine = replaceFirst(lastDoWhileNodeText, ");", "");
 
                     Node lastDoWhileNode = new Node();
                     lastDoWhileNode.nodeText = lastDoWhileNodeText;

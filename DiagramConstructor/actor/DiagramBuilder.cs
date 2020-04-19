@@ -232,7 +232,7 @@ namespace DiagramConstructor
         /// <returns>last shape in branch</returns>
         private ShapeWrapper startWhileBranch(Node node, ShapeWrapper currentNodeShape, double x, double y)
         {
-            visioManipulator.addSmallTextField("Да", x + 0.28, y + 0.8);
+            visioManipulator.addSmallTextField("Да", x + 0.28, y + 0.7);
             visioManipulator.addSmallTextField("Нет", x + 0.7, y + 1.3);
             y -= 0.2;
             ShapeWrapper lastBranchShape = buildTreeBranchV2(node, currentNodeShape, x, y);

@@ -26,14 +26,53 @@ namespace DiagramConstructor.actor
                 {
                     method.methodSignature = method.methodSignature.Insert(methodArgsIndex, " ");
                 }
-                if(lastGlobalVaribleEndIndex != -1)
+                if (method.methodSignature.LastIndexOf(';') != -1)
                 {
-                    method.methodSignature = method.methodSignature.Substring(lastGlobalVaribleEndIndex + 1);
+                    List<Node> extractedNodes = extractGlobalVarsFromMethodSignature(method.methodSignature);
+                    method.methodSignature = clearMethodSignature(method.methodSignature);
+                    foreach (Node node in extractedNodes)
+                    {
+                        method.methodNodes.Insert(0, node);
+                    }
                 }
                 anylizeNodesTexts(method.methodNodes);
                 compareNodes(method.methodNodes);
             }
             return methodsToAnylize;
+        }
+
+        public String clearMethodSignature(String methodName)
+        {
+            int lastGlobalVaribleEndIndex = methodName.LastIndexOf(';');
+            while (lastGlobalVaribleEndIndex != -1)
+            {
+                methodName = methodName.Substring(lastGlobalVaribleEndIndex + 1);
+                lastGlobalVaribleEndIndex = methodName.LastIndexOf(';');
+            }
+            return methodName;
+        }
+
+        /// <summary>
+        /// Convert global varibles to PROCESS blocks
+        /// </summary>
+        /// <param name="methodName">method signature to search global varibles</param>
+        /// <returns>list of nodes</returns>
+        public List<Node> extractGlobalVarsFromMethodSignature(String methodName)
+        {
+            List<Node> extractedNodes = new List<Node>();
+            Node newNode;
+            int lastGlobalVaribleEndIndex = methodName.LastIndexOf(';');
+            while (lastGlobalVaribleEndIndex != -1)
+            {
+                newNode = new Node();
+                newNode.nodeText = methodName.Substring(0, lastGlobalVaribleEndIndex);
+                newNode.shapeForm = ShapeForm.PROCESS;
+                extractedNodes.Add(newNode);
+
+                methodName = methodName.Substring(lastGlobalVaribleEndIndex + 1);
+                lastGlobalVaribleEndIndex = methodName.LastIndexOf(';');
+            }
+            return extractedNodes;
         }
 
         /// <summary>

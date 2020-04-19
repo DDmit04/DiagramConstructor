@@ -47,7 +47,7 @@ namespace DiagramConstructor
             String code = "";
             if (Configuration.testRun)
             {
-                code = "main(){while(adw){awdawd;dawawd;while(adwz){awd;awd;awd;}awd;}awd;}";
+                code = "filename = 'tabl_umn.txt';main(){ifstreamreadFileStream(filename);buffer = '';if(readFileStream.is_open()){cout<<'fileisexists!''';while(getline(readFileStream,buffer)){cout<<buffer<<''';}}else{ofstreamwriteFileStream(filename);cout<<'fileisn'texists!'';for(i = 2;i<10;i++){for(j = 2;j<10;j++){writeFileStream<<i<<'X'<<j<<' = '<<i*j<<''';}writeFileStream<<''';}cout<<'filecreated!';}}";
             }
             else
             {
