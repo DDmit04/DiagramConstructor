@@ -45,6 +45,7 @@ Console С# application creating visio diagrams from C++ code.
 
 * Init varible before use it (optional).
 ```diff
+
 - int a = someValue;
 
 + int a = 0;
