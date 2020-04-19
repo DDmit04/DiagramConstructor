@@ -9,7 +9,7 @@ namespace DiagramConstructor
     class Node
     {
         public ShapeForm shapeForm { get; set; } = ShapeForm.PROCESS;
-        public String nodeText { get; set; } = "no text";
+        public String nodeText { get; set; } = "";
         public List<Node> childNodes { get; set; } = new List<Node>();
         public List<Node> childIfNodes { get; set; } = new List<Node>();
         public List<Node> childElseNodes { get; set; } = new List<Node>();

@@ -1,5 +1,4 @@
-﻿using DiagramConstructor.actor;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
@@ -7,21 +6,14 @@ namespace DiagramConstructor
 {
     class CodeParser
     {
-        private String codeToParse;
-
-        private List<Node> methodNodes;
+        private List<Node> methodNodes = new List<Node>();
 
         private Regex methodSingleCall = new Regex(@"(\S*)\((\S*)\)");
         private Regex methodReturnCall = new Regex(@"(\S*)(\=)(\S*)\((\S*)\)");
         private Regex methodCallOnObject = new Regex(@"\S*\=\S*\.\S*\(\S*\)");
         private Regex unimportantOutput = new Regex(@"\'\S*\'\,*");
 
-        public CodeParser(String codeToParse)
-        {
-            this.codeToParse = codeToParse;
-        }
-
-        public List<Method> ParseCode()
+        public List<Method> ParseCode(String codeToParse)
         {
             List<Method> methods = new List<Method>();
             String nextMethodCode = "";

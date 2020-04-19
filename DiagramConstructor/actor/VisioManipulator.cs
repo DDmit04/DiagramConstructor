@@ -3,10 +3,10 @@ using System;
 
 namespace DiagramConstructor.actor
 {
-    class ShapeManipulator
+    class VisioManipulator
     {
 
-        private Application visioApp = new Application();
+        private Application visioApp;
         private Document visioStencil;
 
         private Master begin;
@@ -24,31 +24,28 @@ namespace DiagramConstructor.actor
         private Master arrowRight;
         private Master littleInvisibleBlock;
 
-        public ShapeManipulator()
+        public void openDocument()
         {
-            visioStencil = visioApp.Documents.OpenEx(
+            this.visioApp = new Application();
+            this.visioStencil = visioApp.Documents.OpenEx(
                AppDomain.CurrentDomain.BaseDirectory + @"\Help\Shapes.vssx",
                (short)VisOpenSaveArgs.visOpenDocked
             );
-            begin = visioStencil.Masters.get_ItemU(@"Начало");
-            process = visioStencil.Masters.get_ItemU(@"Процесс");
-            inoutPut = visioStencil.Masters.get_ItemU(@"Ввод/вывод");
-            ifState = visioStencil.Masters.get_ItemU(@"Ветвление");
-            forState = visioStencil.Masters.get_ItemU(@"Блок модификаций");
-            program = visioStencil.Masters.get_ItemU(@"Предопределенный процесс");
-            connector = visioStencil.Masters.get_ItemU(@"Соединитель");
-            pageConnector = visioStencil.Masters.get_ItemU(@"Межстраничный соединитель");
-            line = visioStencil.Masters.get_ItemU(@"line");
-            textField = visioStencil.Masters.get_ItemU(@"textField");
-            smallTextField = visioStencil.Masters.get_ItemU(@"yesNo");
-            arrowLeft = visioStencil.Masters.get_ItemU(@"arrowLeft");
-            arrowRight = visioStencil.Masters.get_ItemU(@"arrowRight");
-            littleInvisibleBlock = visioStencil.Masters.get_ItemU(@"LittleInvisibleBlock");
-        }
-
-        public void openDocument()
-        {
-            visioApp.Documents.Add("");
+            this.begin = visioStencil.Masters.get_ItemU(@"Начало");
+            this.process = visioStencil.Masters.get_ItemU(@"Процесс");
+            this.inoutPut = visioStencil.Masters.get_ItemU(@"Ввод/вывод");
+            this.ifState = visioStencil.Masters.get_ItemU(@"Ветвление");
+            this.forState = visioStencil.Masters.get_ItemU(@"Блок модификаций");
+            this.program = visioStencil.Masters.get_ItemU(@"Предопределенный процесс");
+            this.connector = visioStencil.Masters.get_ItemU(@"Соединитель");
+            this.pageConnector = visioStencil.Masters.get_ItemU(@"Межстраничный соединитель");
+            this.line = visioStencil.Masters.get_ItemU(@"line");
+            this.textField = visioStencil.Masters.get_ItemU(@"textField");
+            this.smallTextField = visioStencil.Masters.get_ItemU(@"yesNo");
+            this.arrowLeft = visioStencil.Masters.get_ItemU(@"arrowLeft");
+            this.arrowRight = visioStencil.Masters.get_ItemU(@"arrowRight");
+            this.littleInvisibleBlock = visioStencil.Masters.get_ItemU(@"LittleInvisibleBlock");
+            this.visioApp.Documents.Add("");
         }
 
         public String closeDocument()
@@ -61,6 +58,7 @@ namespace DiagramConstructor.actor
             visioApp.ActiveDocument.SaveAs(resulrFilePath);
             visioStencil.Close();
             visioApp.ActiveDocument.Close();
+            visioApp.Quit();
             return resulrFilePath;
         }
 
