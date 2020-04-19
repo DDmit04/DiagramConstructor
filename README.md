@@ -1,4 +1,4 @@
-# DiagramConstructor (1.0.1)
+# DiagramConstructor (1.0.2.)
 
 Console С# application creating visio diagrams from C++ code.
 
