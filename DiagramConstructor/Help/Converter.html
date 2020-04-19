@@ -47,8 +47,14 @@
         //delete processor directives
         resultCode.value = resultCode.value.replace(/^\#\w*\s*[\<|\"]\w*\.*\w?[\>|\"]/gm, "")
 
+        //deltet structs and arrays init
+        resultCode.value = resultCode.value.replace(/=+\s*\{(\{*((\d*|\w*|"|')\,*\s*)*\}*\,*)*\}\s*;/gm, "")
+
+        //delete structs
+        resultCode.value = resultCode.value.replace(/struct\s*\S*\s*\{([^{}]*)*\};/gm, "")
+
         //delete arrays init (any demention)
-        resultCode.value = resultCode.value.replace(/(const)*\s*(void|char|int|double|bool|long|short|string|String|float)+\s*\**\s*\S*\s*(\[\d*\])*\=+\s*\{(\{*((\d*|\w*|"|')\,*\s*)*\}*\,*)*\}\s*;+/gm, "")
+        resultCode.value = resultCode.value.replace(/(const)*\s*(void|char|int|double|bool|long|short|string|String|float)+\s*\**\s*\S*\s*(\[\d*\])*;+/gm, "")
 
         //delete init premitive values and arrays of them (incude refs)
         resultCode.value = resultCode.value.replace(/(const)*\s*[^for(]\s*(void|char|int|double|bool|long|short|string|String|float)+\s*\**\s*\S*\s*(\[\d*\])*(\=+\s*0|"\s*"|'\s*')+;/gm, "")
