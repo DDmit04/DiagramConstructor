@@ -15,14 +15,20 @@ namespace DiagramConstructor.actor
         public List<Method> analyzeMethods(List<Method> methodsToAnylize)
         {
             int methodArgsIndex = -1;
+            int lastGlobalVaribleEndIndex = -1;
             foreach (Method method in methodsToAnylize)
             {
                 Regex arraySizeRegexp = new Regex(@"(\[\d*\])*");
                 method.methodSignature = arraySizeRegexp.Replace(method.methodSignature, "", 1);
                 methodArgsIndex = method.methodSignature.IndexOf('(');
+                lastGlobalVaribleEndIndex = method.methodSignature.LastIndexOf(';');
                 if (methodArgsIndex != -1)
                 {
                     method.methodSignature = method.methodSignature.Insert(methodArgsIndex, " ");
+                }
+                if(lastGlobalVaribleEndIndex != -1)
+                {
+                    method.methodSignature = method.methodSignature.Substring(lastGlobalVaribleEndIndex + 1);
                 }
                 anylizeNodesTexts(method.methodNodes);
                 compareNodes(method.methodNodes);
@@ -42,11 +48,7 @@ namespace DiagramConstructor.actor
             {
                 currentNode = nodesToAnylize[i];
 
-                if (currentNode.shapeForm == ShapeForm.PROCESS)
-                {
-                    currentNode.nodeText = anylizeProcessNodeText(currentNode.nodeText);
-                }
-                else if (currentNode.shapeForm == ShapeForm.FOR)
+                if (currentNode.shapeForm == ShapeForm.FOR)
                 {
                     currentNode.nodeText = anylizeForNodeText(currentNode.nodeText);
                 } 
@@ -142,30 +144,13 @@ namespace DiagramConstructor.actor
         }
 
         /// <summary>
-        /// Modificate text in PROCESS shape
-        /// </summary>
-        /// <param name="startText">text to anylize</param>
-        /// <returns>modificated text</returns>
-        private String anylizeProcessNodeText(String startText)
-        {
-            int equalSignIndex = startText.IndexOf('=');
-            if (equalSignIndex != -1)
-            {
-                startText = startText.Insert(equalSignIndex, " ");
-                equalSignIndex = startText.IndexOf('=');
-                startText = startText.Insert(equalSignIndex + 1, " ");
-            }
-            return startText;
-        }
-
-        /// <summary>
         /// Check is console output just constant string
         /// </summary>
         /// <param name="startText">text to anylize</param>
         /// <returns>is console output just constant string</returns>
         private bool isUnimportantOutput(String startText)
         {
-            Regex unimportantOutput = new Regex(@"Вывод\s*\'\S*\'");
+            Regex unimportantOutput = new Regex(@"^Вывод\s*(\'\s*\S*\s*\'|\s*)(<<endl)*$");
 
             return unimportantOutput.IsMatch(startText) && startText.IndexOf(',') == -1;
         }

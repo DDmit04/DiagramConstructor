@@ -13,6 +13,11 @@ namespace DiagramConstructor
         private Regex methodCallOnObject = new Regex(@"\S*\=\S*\.\S*\(\S*\)");
         private Regex unimportantOutput = new Regex(@"\'\S*\'\,*");
 
+        /// <summary>
+        /// Class main method convert code from string to AST
+        /// </summary>
+        /// <param name="codeToParse">code as string to convert</param>
+        /// <returns>AST (list of methods)</returns>
         public List<Method> ParseCode(String codeToParse)
         {
             List<Method> methods = new List<Method>();

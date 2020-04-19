@@ -46,26 +46,34 @@
         resultCode.value = resultCode.value.replace(/using\s*namespace\s*\w*\;/gm, "")
         //delete processor directives
         resultCode.value = resultCode.value.replace(/\#\w*\s*[\<|\"]\w*\.*\w?[\>|\"]/gm, "")
+        //delete sructures
+        resultCode.value = resultCode.value.replace(/^(struct)\s*\S*\s*\{([^{}]*)*\};/gm, "")
 
-        //deltet structs and arrays init
-        resultCode.value = resultCode.value.replace(/=+\s*\{(\{*((\d*|\w*|"|')\,*\s*)*\}*\,*)*\}\s*;/gm, "")
+        //simple varible declaration with default init
+        resultCode.value = resultCode.value.replace(/^((const)*(\s*\S*\s*)\s*\**\s*)(\s*\S*\s*)(=|;)+\s*(0|''|"")\s*;/gm, "")
+        //simple varible declaration
+        resultCode.value = resultCode.value.replace(/^(const)*\s*(void|char|int|double|bool|long|short|string|float)+\s*\**\s*\S*\s*;/gm, "")
 
-        //delete structs
-        resultCode.value = resultCode.value.replace(/struct\s*\S*\s*\{([^{}]*)*\};/gm, "")
+        //arr or struct declaration with init
+        resultCode.value = resultCode.value.replace(/^((const)*(\s*\S*\s*)\s*\**\s*)(\s*\S*\s*)(\[\d*\])*\s*=+\s*{({*((\d*|\w*|"|'),*\s*)*}*\,*)*}\s*;/gm, "")
+        //arr declaration
+        resultCode.value = resultCode.value.replace(/^((const)*(\s*\S*\s*)\s*\**\s*)(\s*\S*\s*)(\[\d*\])+\s*;/gm, "")
 
-        //delete arrays init (any demention)
-        resultCode.value = resultCode.value.replace(/(const)*\s*(void|char|int|double|bool|long|short|string|float)+\s*\**\s*\S*\s*(\[\d*\])*;+/gm, "")
+        //object createtion (constructor call)
+        resultCode.value = resultCode.value.replace(/^(const)*(\s*\S*\s*)\s*\**\s*(\s*\S*\s*)(\(\s*\S*\s*\))+;/gm, "")
 
-        //delete init premitive values and arrays of them (incude refs)
-        resultCode.value = resultCode.value.replace(/(const)*\s*[^for(&&^{]\s*(void|char|int|double|bool|long|short|string|String|float)+\s*\**\s*\S*\s*(\[\d*\])*(\=+\s*0|"\s*"|'\s*')+;/gm, "")
-        //delete premitive data type strings
-        resultCode.value = resultCode.value.replace(/(const)*(void|int|char|double|long|short|string|String|float)/gm, "")
+
+        //delete service words
+        resultCode.value = resultCode.value.replace(/(const)*(return|void|int|char|double|long|short|string|String|float)/gm, "")
         //delete <namespace>::
         resultCode.value = resultCode.value.replace(/(\d*|\w*)+::/gm, "")
 
         //global trim
         resultCode.value = resultCode.value.replace(/\r|\n|\t/g, '');
         resultCode.value = resultCode.value.split(' ').join('');
+        resultCode.value = resultCode.value.split('=').join(' = ');
+        resultCode.value = resultCode.value.replace(/"/g, "'");
+        resultCode.value = resultCode.value.replace(/\\n/g, "'");
     });
 
     copyBtn.addEventListener('click', () => {

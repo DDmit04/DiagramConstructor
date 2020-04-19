@@ -47,7 +47,7 @@ namespace DiagramConstructor
             String code = "";
             if (Configuration.testRun)
             {
-                code = "main(){do{while(awd){daw;awd;}}while(awd);}";
+                code = "main(){while(adw){awdawd;dawawd;while(adwz){awd;awd;awd;}awd;}awd;}";
             }
             else
             {

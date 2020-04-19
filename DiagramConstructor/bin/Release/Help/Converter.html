@@ -39,18 +39,32 @@
     var resultCode = document.getElementById('resultCode');
 
     convertBtn.addEventListener('click', () => {
+
         //delete comments
-        resultCode.value = codeToConvert.value.replace(/\/\/(\s*\S*)*$\n/g, '');
-        //delete int, double, short, bool, string and arrays of it (incude refs)
-        resultCode.value = resultCode.value.replace(/(void|int|double|bool|long|short|string|float)\**(\[\d*\])*/gm, "")
-        //delete globla values
-        resultCode.value = resultCode.value.replace(/\S*\s*=\s*\S*\s*;\n/gm, "")
-        //delete <namespace>::
-        resultCode.value = resultCode.value.replace(/\w+::/gm, "")
+        resultCode.value = codeToConvert.value.replace(/\/\/(\s*\S*)*$\n/g, '')
         //delete "using namespace"
-        resultCode.value = resultCode.value.replace(/^using\s*namespace\s*\w*\;/gm, "")
+        resultCode.value = resultCode.value.replace(/using\s*namespace\s*\w*\;/gm, "")
         //delete processor directives
-        resultCode.value = resultCode.value.replace(/^\#\w*\s*[\<|\"]\w*\.*\w?[\>|\"]/gm, "")
+        resultCode.value = resultCode.value.replace(/\#\w*\s*[\<|\"]\w*\.*\w?[\>|\"]/gm, "")
+
+        //simple varible declaration with default init
+        resultCode.value = resultCode.value.replace(/^((const)*(\s*\S*\s*)\s*\**\s*)(\s*\S*\s*)(=|;)+\s*(0|''|"")\s*;/gm, "")
+        //simple varible declaration
+        resultCode.value = resultCode.value.replace(/^(const)*\s*(void|char|int|double|bool|long|short|string|float)+\s*\**\s*\S*\s*;/gm, "")
+
+        //arr or struct declaration with init
+        resultCode.value = resultCode.value.replace(/^((const)*(\s*\S*\s*)\s*\**\s*)(\s*\S*\s*)(\[\d*\])*\s*=+\s*{({*((\d*|\w*|"|'),*\s*)*}*\,*)*}\s*;/gm, "")
+        //arr declaration
+        resultCode.value = resultCode.value.replace(/^((const)*(\s*\S*\s*)\s*\**\s*)(\s*\S*\s*)(\[\d*\])+\s*;/gm, "")
+
+        //object createtion (constructor call)
+        resultCode.value = resultCode.value.replace(/^(const)*(\s*\S*\s*)\s*\**\s*(\s*\S*\s*)(\(\s*\S*\s*\))+;/gm, "")
+
+
+        //delete service words
+        resultCode.value = resultCode.value.replace(/(const)*(return|void|int|char|double|long|short|string|String|float)/gm, "")
+        //delete <namespace>::
+        resultCode.value = resultCode.value.replace(/(\d*|\w*)+::/gm, "")
 
         //global trim
         resultCode.value = resultCode.value.replace(/\r|\n|\t/g, '');

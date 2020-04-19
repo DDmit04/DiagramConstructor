@@ -87,7 +87,7 @@ namespace DiagramConstructor
         private void placeBeginShape()
         {
             globalLastDropedShapeV2 = visioManipulator.dropShapeV2(ShapeForm.BEGIN, "Начало", coreX, coreY);
-            coreY -= 0.95;
+            coreY -= 0.75;
         }
 
         /// <summary>
@@ -232,8 +232,8 @@ namespace DiagramConstructor
         /// <returns>last shape in branch</returns>
         private ShapeWrapper startWhileBranch(Node node, ShapeWrapper currentNodeShape, double x, double y)
         {
-            visioManipulator.addSmallTextField("Да", x + 0.38, y + 0.5);
-            visioManipulator.addSmallTextField("Нет", x + 0.7, y + 1.5);
+            visioManipulator.addSmallTextField("Да", x + 0.28, y + 0.8);
+            visioManipulator.addSmallTextField("Нет", x + 0.7, y + 1.3);
             y -= 0.2;
             ShapeWrapper lastBranchShape = buildTreeBranchV2(node, currentNodeShape, x, y);
             return lastBranchShape;
@@ -385,7 +385,14 @@ namespace DiagramConstructor
                 }
                 else if (currentNode.isSimpleNode())
                 {
+                    if (lastBranchShape.isCommonShape())
+                    {
+                        //IMPOTRANT connect shape in one branch if last shape is common
+                        updateGlobalValuesBeforeRecursion(true, lastBranchShape);
+                    }
                     lastBranchShape = buildTreeV2(currentNode, x, y);
+                    //IMPORTANT update last shape
+                    updateGlobalValuesBeforeRecursion(true, lastBranchShape);
                 }
                 else
                 {
