@@ -116,7 +116,7 @@ namespace DiagramConstructor.actor
         /// <param name="x">shape x</param>
         /// <param name="y">shape y</param>
         /// <returns>placed shape</returns>
-        public ShapeWrapper adSmallTextField(String text, double x, double y)
+        public ShapeWrapper addSmallTextField(String text, double x, double y)
         {
             Page visioPage = visioApp.ActivePage;
             ShapeWrapper shape = dropShapeV2(ShapeForm.SMALL_TEXT_FIELD, text, x, y);
@@ -183,13 +183,11 @@ namespace DiagramConstructor.actor
                 case ShapeForm.BEGIN:
                     resultFigure = begin;
                     break;
-                case ShapeForm.IF:
-                    resultFigure = ifState;
-                    break;
                 case ShapeForm.FOR:
                     resultFigure = forState;
                     break;
                 case ShapeForm.WHILE:
+                case ShapeForm.IF:
                     resultFigure = ifState;
                     break;
                 case ShapeForm.PROCESS:
@@ -223,6 +221,7 @@ namespace DiagramConstructor.actor
                     resultFigure = smallTextField;
                     break;
                 case ShapeForm.INVISIBLE_BLOCK:
+                case ShapeForm.DO:
                     resultFigure = littleInvisibleBlock;
                     break;
             }

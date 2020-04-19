@@ -36,7 +36,7 @@ namespace DiagramConstructor
             foreach (Method method in codeThree)
             {
 
-                if (!method.methodSignature.Equals("main()"))
+                if (!method.methodSignature.Equals("main ()"))
                 {
                     shapeManipulator.addTextField(method.methodSignature, coreX, coreY);
                     coreY -= 0.4;
@@ -139,12 +139,73 @@ namespace DiagramConstructor
                 buildTreeBranchV2(node, currentNodeShape, x, y);
                 coreY -= 0.2;
             }
+            else if(node.shapeForm == ShapeForm.DO)
+            {
+                lastBranchShape = buildDoWhileBranch(node, currentNodeShape, x, y);
+                //IMPORTANT (after method)
+                updateGlobalValuesBeforeRecursion(true, lastBranchShape);
+                coreY -= 0.2;
+            }
             if (y < coreY)
             {
                 coreY = y;
             }
             //call with false!!!
             updateGlobalValuesBeforeRecursion(false, null);
+            return lastBranchShape;
+        }
+
+        private ShapeWrapper buildDoWhileBranch(Node node, ShapeWrapper chainParentShape, double x, double y)
+        {
+            Node currentNode = null;
+            ShapeWrapper lastBranchShape = null;
+            for (int i = 0; i < node.childNodes.Count; i++)
+            {
+                currentNode = node.childNodes[i];
+                if(i != node.childNodes.Count - 1)
+                {
+                    if (currentNode.isSimpleNode())
+                    {
+                        lastBranchShape = buildTreeV2(currentNode, x, y);
+                        //IMPORTANT (global droped shape is changes every time when recursion call)!!!
+                        updateGlobalValuesBeforeRecursion(true, lastBranchShape);
+                    }
+                    else
+                    {
+                        lastBranchShape = buildTreeV2(currentNode, x, y);
+                        //IMPORTANT (false to shift branch) (global droped shape is changes every time when recursion call)!!!
+                        updateGlobalValuesBeforeRecursion(false, lastBranchShape);
+                        y -= Math.Max(currentNode.childNodes.Count, Math.Max(currentNode.childIfNodes.Count, currentNode.childElseNodes.Count));
+                        y -= 0.5;
+                    }
+                    y--;
+                } 
+                else
+                {
+                    y -= 0.2;
+
+                    shapeManipulator.addSmallTextField("Да", x - 0.7, y + 0.2);
+                    shapeManipulator.addSmallTextField("Нет", x + 0.7, y + 0.2);
+
+                    //drop last do while shape (while)
+                    lastBranchShape = shapeManipulator.dropShapeV2(currentNode, x, y);
+
+                    // connect last shape with perv shape
+                    ShapeConnectionType shapeConnectionType = BuilderUtills.defineConnectionType(globalLastDropedShapeV2, lastBranchShape, globalIsSameBranch);
+                    shapeManipulator.connectShapes(globalLastDropedShapeV2.shape, lastBranchShape.shape, ShapeForm.LINE, shapeConnectionType);
+
+                    // connsect last shape with do-while branch parent
+                    shapeManipulator.connectShapes(chainParentShape.shape, lastBranchShape.shape, ShapeForm.ARROW_LEFT, ShapeConnectionType.FROM_LEFT_TO_CENTER);
+                    
+                    //IMPORTANT (global droped shape is changes every time when recursion call)!!!
+                    updateGlobalValuesBeforeRecursion(true, lastBranchShape);
+                    y--;
+                }
+            }
+            if (y < coreY)
+            {
+                coreY = y;
+            }
             return lastBranchShape;
         }
 
@@ -158,8 +219,8 @@ namespace DiagramConstructor
         /// <returns>last shape in branch</returns>
         private ShapeWrapper startWhileBranch(Node node, ShapeWrapper currentNodeShape, double x, double y)
         {
-            shapeManipulator.adSmallTextField("Да", x + 0.38, y + 0.5);
-            shapeManipulator.adSmallTextField("Нет", x + 0.7, y + 1.5);
+            shapeManipulator.addSmallTextField("Да", x + 0.38, y + 0.5);
+            shapeManipulator.addSmallTextField("Нет", x + 0.7, y + 1.5);
             y -= 0.2;
             ShapeWrapper lastBranchShape = buildTreeBranchV2(node, currentNodeShape, x, y);
             return lastBranchShape;
@@ -175,8 +236,8 @@ namespace DiagramConstructor
         /// <returns>last shape in branch (in this case - invisible block connecting if and else branches)</returns>
         private ShapeWrapper startIfElseBranch(Node node, ShapeWrapper currentNodeShape, double x, double y)
         {
-            shapeManipulator.adSmallTextField("Да", x - 0.7, y + 1.2);
-            shapeManipulator.adSmallTextField("Нет", x + 0.7, y + 1.2);
+            shapeManipulator.addSmallTextField("Да", x - 0.7, y + 1.2);
+            shapeManipulator.addSmallTextField("Нет", x + 0.7, y + 1.2);
 
             ShapeWrapper lastBranchShape = buildIfElseTreeBranchV2(node.childIfNodes, currentNodeShape, ShapeConnectionType.FROM_LEFT_TO_TOP, x - 1.2, y);
 
@@ -212,7 +273,6 @@ namespace DiagramConstructor
         private ShapeWrapper buildTreeBranchV2(Node node, ShapeWrapper chainParentShape, double x, double y)
         {
             ShapeWrapper lastBranchShape = null;
-            ShapeWrapper prevShape = chainParentShape;
             if(node.childNodes.Count == 0)
             {
                 lastBranchShape = buildTreeV2(node, x, y);
@@ -236,7 +296,6 @@ namespace DiagramConstructor
                     y -= Math.Max(currentNode.childNodes.Count, Math.Max(currentNode.childIfNodes.Count, currentNode.childElseNodes.Count));
                     y -= 0.5;
                 }
-                prevShape = lastBranchShape;
                 y--;
             }
             // if parent shape exists connect last branch shape to it
@@ -262,20 +321,21 @@ namespace DiagramConstructor
         /// <returns>last branch shape</returns>
         private ShapeWrapper buildIfElseTreeBranchV2(List<Node> nodes, ShapeWrapper chainParentShape, ShapeConnectionType ifElseConnectionType, double x, double y)
         {
+            Node currentNode = null;
             ShapeWrapper lastBranchShape = null;
             for (int i = 0; i < nodes.Count; i++)
             {
-                Node node = nodes[i];
-                if (node.isSimpleNode() && i == 0)
+                currentNode = nodes[i];
+                if (currentNode.isSimpleNode() && i == 0)
                 {
-                    lastBranchShape = shapeManipulator.dropShapeV2(node, x, y);
+                    lastBranchShape = shapeManipulator.dropShapeV2(currentNode, x, y);
                     shapeManipulator.connectShapes(lastBranchShape.shape, chainParentShape.shape, ShapeForm.LINE, ifElseConnectionType);
                     //IMPORTANT (global droped shape is changes every time when recursion call)!!!
                     updateGlobalValuesBeforeRecursion(true, lastBranchShape);
                 } 
                 else if(i == 0)
                 {
-                    if(node.shapeForm == ShapeForm.IF)
+                    if(currentNode.shapeForm == ShapeForm.IF)
                     {
                         if(ifElseConnectionType == ShapeConnectionType.FROM_LEFT_TO_TOP)
                         {
@@ -286,16 +346,16 @@ namespace DiagramConstructor
                             x += 1.2;
                             startX = x;
                         }
-                        lastBranchShape = shapeManipulator.dropShapeV2(node, x, y);
+                        lastBranchShape = shapeManipulator.dropShapeV2(currentNode, x, y);
                         shapeManipulator.connectShapes(lastBranchShape.shape, chainParentShape.shape, ShapeForm.LINE, ifElseConnectionType);
                         y--;
-                        lastBranchShape = startIfElseBranch(node, lastBranchShape, x, y);
+                        lastBranchShape = startIfElseBranch(currentNode, lastBranchShape, x, y);
                     }
                     else
                     {
                         //IMPORTANT (false to shift branch) rest global shape baccause current shape already connected manualy
                         updateGlobalValuesBeforeRecursion(false, null);
-                        lastBranchShape = buildTreeV2(node, x, y);
+                        lastBranchShape = buildTreeV2(currentNode, x, y);
                         shapeManipulator.connectShapes(lastBranchShape.shape, chainParentShape.shape, ShapeForm.LINE, ifElseConnectionType);
                     }
                     if (lastBranchShape.isCommonShape())
@@ -310,16 +370,16 @@ namespace DiagramConstructor
                     }
                     coreY -= 0.2;
                 }
-                else if (node.isSimpleNode())
+                else if (currentNode.isSimpleNode())
                 {
-                    lastBranchShape = buildTreeV2(node, x, y);
+                    lastBranchShape = buildTreeV2(currentNode, x, y);
                 }
                 else
                 {
-                    lastBranchShape = buildTreeV2(node, x, y);
+                    lastBranchShape = buildTreeV2(currentNode, x, y);
                     //IMPORTANT (global droped shape is changes every time when recursion call)!!!
                     updateGlobalValuesBeforeRecursion(false, lastBranchShape);
-                    y -= Math.Max(node.childNodes.Count, Math.Max(node.childIfNodes.Count, node.childElseNodes.Count));
+                    y -= Math.Max(currentNode.childNodes.Count, Math.Max(currentNode.childIfNodes.Count, currentNode.childElseNodes.Count));
                 }
                 y--;
                 if (y < coreY)

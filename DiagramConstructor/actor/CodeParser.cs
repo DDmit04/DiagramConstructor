@@ -31,7 +31,6 @@ namespace DiagramConstructor
             Method newMethod = new Method("no method!", new List<Node>());
             while (!codeIsEmptyMarcks(codeToParse))
             {
-
                 nextMethodCode = getNextCodeBlock(codeToParse);
                 methodCodeBegin = nextMethodCode.IndexOf('{');
                 methodBlock = nextMethodCode.Substring(methodCodeBegin);
@@ -208,7 +207,7 @@ namespace DiagramConstructor
 
                     Node lastDoWhileNode = new Node();
                     lastDoWhileNode.nodeText = lastDoWhileNodeText;
-                    lastDoWhileNode.shapeForm = ShapeForm.IF;
+                    lastDoWhileNode.shapeForm = ShapeForm.WHILE;
                     newNode.childNodes.Add(lastDoWhileNode);
 
                     newNode.shapeForm = ShapeForm.DO;
