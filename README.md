@@ -37,9 +37,19 @@ Console С# application creating visio diagrams from C++ code.
 
 # Recomendation for better app work
 
-* You need licensed or cracked Visio (you can try run visioActivator.cmd in root of this repo with admin rights to get license)
+* You need licensed or cracked Visio (you can try run visioActivator.cmd in root of this repo with admin rights to get license).
 
 * Then simpler and cleaner the code you wrote, the easier it is to create a diagram.
+
+* Use only english words in code (even in comments).
+
+* Init varible before use it (optional).
+```diff
+- int a = someValue;
+
++ int a = 0;
++ a = somValue;
+```
 
 * Code to input in console must be converted (no spaces, tabs and line breaks):
 
@@ -53,6 +63,13 @@ Console С# application creating visio diagrams from C++ code.
 - app.RunApp(code);
 
 + Stringcode='';if(test){code='';}app.RunApp(code);
+```
+
+* Use common "for" instead "foreach"
+```dif
+- foreach(SomeType value in array) {}
+
++ for(int i = 0; i < array.length; i++) {}
 ```
 
 * Use parentheses even for single line code blocks:

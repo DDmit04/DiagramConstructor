@@ -10,3 +10,29 @@
 * Short IN_OUT_PUT or PROCESS blocks texts is combined to one block.
 * Main ("main()") method name will not be placed.
 * Little user interface improvemens.
+
+
+# Realise 1.0.2
+
+### New
+* Add "do-while" support.
+
+#### Bug fixes
+* Code comments now deleting from diagram correctly.
+* "End" block now placing correctly.
+* App will not stopeed if use array init (any demention) with '{' and '}'.
+* Now Visio document closes correctly after finished building diagran.
+
+#### Encantments
+* Add spaces between equal sign and before method args.
+* Modificate text in FOR block.
+* Ìaribles initialization will be deleting.
+* Namespaces before method call will be deleting.
+* "||" and "&&" now replaceing by "or" and "and".
+* Structures will be removed from diagram.
+* Some UI updates.
+* Don't need to restart program for each diagram building anymore.
+* Global varibles now converting to PROCESS blocks;
+
+### Important 
+* [See updated code recomendations](https://github.com/DDmit04/DiagramConstructor#recomendation-for-better-app-work)
