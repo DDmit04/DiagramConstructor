@@ -36,3 +36,8 @@
 
 ### Important 
 * [See updated code recomendations](https://github.com/DDmit04/DiagramConstructor#recomendation-for-better-app-work)
+
+# Realise 1.0.3
+
+### Bug fixes
+* Fix converter bug wich delete part of "for" statement

@@ -50,7 +50,7 @@
         resultCode.value = resultCode.value.replace(/^(struct)\s*\S*\s*\{([^{}]*)*\};/gm, "")
 
         //simple varible declaration with default init
-        resultCode.value = resultCode.value.replace(/^[^for(|\s*]((const)*(\s*\S*\s*)\s*\**\s*)(\s*\S*\s*)(=|;)+\s*(0|''|"")\s*;/gm, "")
+        resultCode.value = resultCode.value.replace(/((const)*^(?<!for)(int|double)\s*\**\s*)(\s*\S*\s*)(=|;)+\s*(0|''|"")\s*;/gm, "")
         //simple varible declaration
         resultCode.value = resultCode.value.replace(/^(const)*\s*(void|char|int|double|bool|long|short|string|float)+\s*\**\s*\S*\s*;/gm, "")
 
