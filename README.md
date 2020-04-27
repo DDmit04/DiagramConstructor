@@ -67,7 +67,8 @@ Console С# application creating visio diagrams from C++ code.
 ```
 
 * Use common "for" instead "foreach"
-```dif
+
+``` diff
 - foreach(SomeType value in array) {}
 
 + for(int i = 0; i < array.length; i++) {}
