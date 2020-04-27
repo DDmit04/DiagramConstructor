@@ -40,4 +40,5 @@
 # Realise 1.0.3
 
 ### Bug fixes
-* Fix converter bug wich delete part of "for" statement
+* Fix converter bug wich delete part of "for" statement.
+* Output only 'endl' block will not appear.

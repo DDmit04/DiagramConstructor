@@ -9,7 +9,7 @@ namespace DiagramConstructor
         static void Main(string[] args)
         {
 
-            Console.WriteLine("DIAGRAM CONSTRUCTOR 1.0.2.");
+            Console.WriteLine("DIAGRAM CONSTRUCTOR 1.0.3.");
             Console.WriteLine("Author: Dmitrochenkov Daniil.\n\n");
 
             App app = new App(new CodeParser(), new CodeAnalyzer(), new DiagramBuilder());
