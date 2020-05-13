@@ -69,7 +69,8 @@
         //global trim
         resultCode.value = resultCode.value.replace(/\r|\n|\t/g, '');
         resultCode.value = resultCode.value.split(' ').join('');
-        resultCode.value = resultCode.value.split('=').join(' = ');
+        resultCode.value = resultCode.value.split('==').join('=');
+        resultCode.value = resultCode.value.split('->').join('.');
         resultCode.value = resultCode.value.replace(/"/g, "'");
         resultCode.value = resultCode.value.replace(/\\n/g, "'");
     });
