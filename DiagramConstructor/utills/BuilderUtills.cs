@@ -165,7 +165,7 @@ namespace DiagramConstructor.actor
                 }
             }
             double result = Math.Max(commonBrannchMaxLength, Math.Max(elseBrannchMaxLength, ifBrannchMaxLength));
-            if(node.shapeForm == ShapeForm.WHILE || node.shapeForm == ShapeForm.FOR)
+            if(node.shapeForm == ShapeForm.WHILE || node.shapeForm == ShapeForm.FOR || node.shapeForm == ShapeForm.IF)
             {
                 result += 0.2;
             }

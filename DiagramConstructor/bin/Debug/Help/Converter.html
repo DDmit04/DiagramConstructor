@@ -49,8 +49,6 @@
         //delete sructures
         resultCode.value = resultCode.value.replace(/^(struct)\s*\S*\s*\{([^{}]*)*\};/gm, "")
 
-        //simple varible declaration with default init
-        resultCode.value = resultCode.value.replace(/^[^for(|\s*]((const)*(\s*\S*\s*)\s*\**\s*)(\s*\S*\s*)(=|;)+\s*(0|''|"")\s*;/gm, "")
         //simple varible declaration
         resultCode.value = resultCode.value.replace(/^(const)*\s*(void|char|int|double|bool|long|short|string|float)+\s*\**\s*\S*\s*;/gm, "")
 
@@ -71,7 +69,8 @@
         //global trim
         resultCode.value = resultCode.value.replace(/\r|\n|\t/g, '');
         resultCode.value = resultCode.value.split(' ').join('');
-        resultCode.value = resultCode.value.split('=').join(' = ');
+        resultCode.value = resultCode.value.split('==').join('=');
+        resultCode.value = resultCode.value.split('->').join('.');
         resultCode.value = resultCode.value.replace(/"/g, "'");
         resultCode.value = resultCode.value.replace(/\\n/g, "'");
     });

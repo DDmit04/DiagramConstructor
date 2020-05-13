@@ -94,8 +94,8 @@ namespace DiagramConstructor.actor
                 }
                 else if (currentNode.shapeForm == ShapeForm.WHILE || currentNode.shapeForm == ShapeForm.IF)
                 {
-                    currentNode.nodeText = currentNode.nodeText.Replace("||", "or").Replace("|", "or");
-                    currentNode.nodeText = currentNode.nodeText.Replace("&&", "and").Replace("&", "and");
+                    currentNode.nodeText = currentNode.nodeText.Replace("||", " or ").Replace("|", " or ");
+                    currentNode.nodeText = currentNode.nodeText.Replace("&&", " and ").Replace("&", " and ");
                 }
                 else if (currentNode.shapeForm == ShapeForm.PROCESS && d.IsMatch(currentNode.nodeText))
                 {
@@ -108,15 +108,15 @@ namespace DiagramConstructor.actor
                     continue;
                 }
 
-                if (currentNode.childNodes.Count != 0)
+                if (nodeBranchNeedAnylize(currentNode.childNodes))
                 {
                     currentNode.childNodes = anylizeNodesTexts(currentNode.childNodes);
                 }
-                if (currentNode.childIfNodes.Count != 0)
+                if (nodeBranchNeedAnylize(currentNode.childIfNodes))
                 {
                     currentNode.childIfNodes = anylizeNodesTexts(currentNode.childIfNodes);
                 }
-                if (currentNode.childElseNodes.Count != 0)
+                if (nodeBranchNeedAnylize(currentNode.childElseNodes))
                 {
                     currentNode.childElseNodes = anylizeNodesTexts(currentNode.childElseNodes);
                 }
@@ -138,15 +138,15 @@ namespace DiagramConstructor.actor
             for (int i = nodesToAnylize.Count - 1; i >= 0; i--)
             {
                 currentNode = nodesToAnylize[i];
-                if (currentNode.childNodes.Count != 0)
+                if (nodeBranchNeedAnylize(currentNode.childNodes))
                 {
                     currentNode.childNodes = compareNodes(currentNode.childNodes);
                 }
-                if (currentNode.childIfNodes.Count != 0)
+                if (nodeBranchNeedAnylize(currentNode.childIfNodes))
                 {
                     currentNode.childIfNodes = compareNodes(currentNode.childIfNodes);
                 }
-                if (currentNode.childElseNodes.Count != 0)
+                if (nodeBranchNeedAnylize(currentNode.childElseNodes))
                 {
                     currentNode.childElseNodes = compareNodes(currentNode.childElseNodes);
                 }
@@ -172,11 +172,11 @@ namespace DiagramConstructor.actor
                 {
                     if (lastNode.nodeText.Length > 15 || currentNode.nodeText.Length > 15)
                     {
-                        lastNode.nodeText += ",\n" + currentNode.nodeText.Replace("Вывод", "").Replace("Ввод", "");
+                        lastNode.nodeText.Insert(0, currentNode.nodeText.Replace("Вывод", "").Replace("Ввод", "") + ",\n");
                     }
                     else
                     {
-                        lastNode.nodeText += "," + currentNode.nodeText.Replace("Вывод", "").Replace("Ввод", "");
+                        lastNode.nodeText.Insert(0, currentNode.nodeText.Replace("Вывод", "").Replace("Ввод", "") + ", ");
                     }
                     nodesToAnylize.RemoveAt(i);
                 }
@@ -198,6 +198,11 @@ namespace DiagramConstructor.actor
             Regex unimportantOutput = new Regex(@"^Вывод\s*(\'\s*\S*\s*\'|\s*)(endl)*$");
 
             return unimportantOutput.IsMatch(startText) && startText.IndexOf(',') == -1;
+        }
+
+        private bool nodeBranchNeedAnylize(List<Node> nodes)
+        {
+            return nodes.Count > 1 || (nodes.Count > 0 && nodes[0].shapeForm != ShapeForm.IN_OUT_PUT);
         }
 
 
