@@ -159,8 +159,6 @@ Console С# application creating visio diagrams from C++ code.
 
 * "switch" - use "else if" instead of it
 
-* "do-while" - replace it by one block, and add this constructions manualy after application do work.
-
 # Example
 
 From this code:
