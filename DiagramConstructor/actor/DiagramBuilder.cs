@@ -6,7 +6,7 @@ namespace DiagramConstructor
 {
     class DiagramBuilder
     {
-        private ShapeWrapper globalLastDropedShapeV2;
+        private ShapeWrapper globalLastDropedShape;
         private bool globalIsSameBranch = false;
 
         private double startX = 1.25;
@@ -28,7 +28,7 @@ namespace DiagramConstructor
         /// </summary>
         private void setDefaultValues()
         {
-            this.globalLastDropedShapeV2 = null;
+            this.globalLastDropedShape = null;
             this.globalIsSameBranch = false;
             this.startX = 1.25;
             this.coreX = 1.25;
@@ -60,12 +60,13 @@ namespace DiagramConstructor
                 for (int i = 0; i < method.methodNodes.Count; i++)
                 {
                     Node node = method.methodNodes[i];
-                    globalLastDropedShapeV2 = buildTreeV2(node, coreX, coreY);
+                    globalLastDropedShape = buildTree(node, coreX, coreY);
                 }
 
+                coreY += 0.3;
                 placeEndShape(method.methodNodes);
 
-                updateGlobalValuesBeforeRecursion(globalIsSameBranch, null);
+                updateGlobalValues(globalIsSameBranch, null);
 
                 startX += 4.5;
                 coreX = startX;
@@ -86,7 +87,7 @@ namespace DiagramConstructor
         /// </summary>
         private void placeBeginShape()
         {
-            globalLastDropedShapeV2 = visioManipulator.dropShapeV2(ShapeForm.BEGIN, "Начало", coreX, coreY);
+            globalLastDropedShape = visioManipulator.dropShape(ShapeForm.BEGIN, "Начало", coreX, coreY);
             coreY -= 0.75;
         }
 
@@ -95,10 +96,10 @@ namespace DiagramConstructor
         /// </summary>
         /// <param name="sameBranch">new inSameBranch value</param>
         /// <param name="lastBranchShape">new globalLastDropedShapeV2 value</param>
-        private void updateGlobalValuesBeforeRecursion(bool sameBranch, ShapeWrapper lastBranchShape)
+        private void updateGlobalValues(bool sameBranch, ShapeWrapper lastBranchShape)
         {
             globalIsSameBranch = sameBranch;
-            globalLastDropedShapeV2 = lastBranchShape;
+            globalLastDropedShape = lastBranchShape;
         }
 
         /// <summary>
@@ -106,9 +107,9 @@ namespace DiagramConstructor
         /// </summary>
         private void placeEndShape(List<Node> mainBranch)
         {
-            ShapeWrapper endShape = visioManipulator.dropShapeV2(ShapeForm.BEGIN, "Конец", coreX, coreY);
-            ShapeConnectionType shapeConnection = BuilderUtills.defineConnectionType(globalLastDropedShapeV2, endShape, globalIsSameBranch);
-            visioManipulator.connectShapes(globalLastDropedShapeV2.shape, endShape.shape, ShapeForm.LINE, shapeConnection);
+            ShapeWrapper endShape = visioManipulator.dropShape(ShapeForm.BEGIN, "Конец", coreX, coreY);
+            ShapeConnectionType shapeConnection = BuilderUtills.defineConnectionType(globalLastDropedShape, endShape, globalIsSameBranch);
+            visioManipulator.connectShapes(globalLastDropedShape.shape, endShape.shape, ShapeForm.LINE, shapeConnection);
         }
 
         /// <summary>
@@ -118,13 +119,13 @@ namespace DiagramConstructor
         /// <param name="x">new shape x</param>
         /// <param name="y">new shape y</param>
         /// <returns>last places shape in nodes AST branch</returns>
-        private ShapeWrapper buildTreeV2(Node node, double x, double y)
+        private ShapeWrapper buildTree(Node node, double x, double y)
         {
-            ShapeWrapper currentNodeShape = visioManipulator.dropShapeV2(node, x, y);
-            if (globalLastDropedShapeV2 != null)
+            ShapeWrapper currentNodeShape = visioManipulator.dropShape(node, x, y);
+            if (globalLastDropedShape != null)
             {
-                ShapeConnectionType shapeConnectionType = BuilderUtills.defineConnectionType(globalLastDropedShapeV2, currentNodeShape, globalIsSameBranch);
-                visioManipulator.connectShapes(globalLastDropedShapeV2.shape, currentNodeShape.shape, ShapeForm.LINE, shapeConnectionType);
+                ShapeConnectionType shapeConnectionType = BuilderUtills.defineConnectionType(globalLastDropedShape, currentNodeShape, globalIsSameBranch);
+                visioManipulator.connectShapes(globalLastDropedShape.shape, currentNodeShape.shape, ShapeForm.LINE, shapeConnectionType);
             }
             y--;
             ShapeWrapper lastBranchShape = currentNodeShape;
@@ -132,7 +133,7 @@ namespace DiagramConstructor
             {
                 lastBranchShape = startIfElseBranch(node, currentNodeShape, x, y);
                 //IMPORTANT (here method must be after)
-                updateGlobalValuesBeforeRecursion(true, lastBranchShape);
+                updateGlobalValues(true, lastBranchShape);
                 coreY -= 0.2;
             } 
             else if (node.shapeForm == ShapeForm.WHILE)
@@ -140,7 +141,7 @@ namespace DiagramConstructor
                 y -= 0.2;
                 lastBranchShape = currentNodeShape;
                 //IMPORTANT
-                updateGlobalValuesBeforeRecursion(true, lastBranchShape);
+                updateGlobalValues(true, lastBranchShape);
                 startWhileBranch(node, currentNodeShape, x, y);
                 coreY -= 0.2;
             }
@@ -148,15 +149,15 @@ namespace DiagramConstructor
             {
                 lastBranchShape = currentNodeShape;
                 //IMPORTANT
-                updateGlobalValuesBeforeRecursion(true, lastBranchShape);
-                buildTreeBranchV2(node, currentNodeShape, x, y);
+                updateGlobalValues(true, lastBranchShape);
+                buildTreeBranch(node, currentNodeShape, x, y);
                 coreY -= 0.2;
             }
             else if(node.shapeForm == ShapeForm.DO)
             {
                 lastBranchShape = buildDoWhileBranch(node, currentNodeShape, x, y);
                 //IMPORTANT (after method)
-                updateGlobalValuesBeforeRecursion(true, lastBranchShape);
+                updateGlobalValues(true, lastBranchShape);
                 coreY -= 0.2;
             }
             if (y < coreY)
@@ -164,7 +165,7 @@ namespace DiagramConstructor
                 coreY = y;
             }
             //call with false!!!
-            updateGlobalValuesBeforeRecursion(false, null);
+            updateGlobalValues(false, null);
             return lastBranchShape;
         }
 
@@ -179,15 +180,15 @@ namespace DiagramConstructor
                 {
                     if (currentNode.isSimpleNode())
                     {
-                        lastBranchShape = buildTreeV2(currentNode, x, y);
+                        lastBranchShape = buildTree(currentNode, x, y);
                         //IMPORTANT (global droped shape is changes every time when recursion call)!!!
-                        updateGlobalValuesBeforeRecursion(true, lastBranchShape);
+                        updateGlobalValues(true, lastBranchShape);
                     }
                     else
                     {
-                        lastBranchShape = buildTreeV2(currentNode, x, y);
+                        lastBranchShape = buildTree(currentNode, x, y);
                         //IMPORTANT (false to shift branch) (global droped shape is changes every time when recursion call)!!!
-                        updateGlobalValuesBeforeRecursion(false, lastBranchShape);
+                        updateGlobalValues(false, lastBranchShape);
                         y -= Math.Max(currentNode.childNodes.Count, Math.Max(currentNode.childIfNodes.Count, currentNode.childElseNodes.Count));
                         y -= 0.5;
                     }
@@ -201,17 +202,17 @@ namespace DiagramConstructor
                     visioManipulator.addSmallTextField("Нет", x + 0.7, y + 0.2);
 
                     //drop last do while shape (while)
-                    lastBranchShape = visioManipulator.dropShapeV2(currentNode, x, y);
+                    lastBranchShape = visioManipulator.dropShape(currentNode, x, y);
 
                     // connect last shape with perv shape
-                    ShapeConnectionType shapeConnectionType = BuilderUtills.defineConnectionType(globalLastDropedShapeV2, lastBranchShape, globalIsSameBranch);
-                    visioManipulator.connectShapes(globalLastDropedShapeV2.shape, lastBranchShape.shape, ShapeForm.LINE, shapeConnectionType);
+                    ShapeConnectionType shapeConnectionType = BuilderUtills.defineConnectionType(globalLastDropedShape, lastBranchShape, globalIsSameBranch);
+                    visioManipulator.connectShapes(globalLastDropedShape.shape, lastBranchShape.shape, ShapeForm.LINE, shapeConnectionType);
 
                     // connsect last shape with do-while branch parent
                     visioManipulator.connectShapes(chainParentShape.shape, lastBranchShape.shape, ShapeForm.ARROW_LEFT, ShapeConnectionType.FROM_LEFT_TO_CENTER);
                     
                     //IMPORTANT (global droped shape is changes every time when recursion call)!!!
-                    updateGlobalValuesBeforeRecursion(true, lastBranchShape);
+                    updateGlobalValues(true, lastBranchShape);
                     y--;
                 }
             }
@@ -235,7 +236,7 @@ namespace DiagramConstructor
             visioManipulator.addSmallTextField("Да", x + 0.28, y + 0.7);
             visioManipulator.addSmallTextField("Нет", x + 0.7, y + 1.3);
             y -= 0.2;
-            ShapeWrapper lastBranchShape = buildTreeBranchV2(node, currentNodeShape, x, y);
+            ShapeWrapper lastBranchShape = buildTreeBranch(node, currentNodeShape, x, y);
             return lastBranchShape;
         }
 
@@ -256,7 +257,7 @@ namespace DiagramConstructor
 
             double statementHeight = BuilderUtills.calcStatementHeight(node);
 
-            ShapeWrapper invisibleBlock = visioManipulator.dropShapeV2(ShapeForm.INVISIBLE_BLOCK, "", x, y - statementHeight);
+            ShapeWrapper invisibleBlock = visioManipulator.dropShape(ShapeForm.INVISIBLE_BLOCK, "", x, y - statementHeight);
 
             visioManipulator.connectLastShapeToInvisibleBlock(invisibleBlock, lastBranchShape);
 
@@ -283,29 +284,29 @@ namespace DiagramConstructor
         /// <param name="x">branch x</param>
         /// <param name="y">branch y</param>
         /// <returns>last branch shape</returns>
-        private ShapeWrapper buildTreeBranchV2(Node node, ShapeWrapper chainParentShape, double x, double y)
+        private ShapeWrapper buildTreeBranch(Node node, ShapeWrapper chainParentShape, double x, double y)
         {
             ShapeWrapper lastBranchShape = null;
             if(node.childNodes.Count == 0)
             {
-                lastBranchShape = buildTreeV2(node, x, y);
+                lastBranchShape = buildTree(node, x, y);
                 //IMPORTANT (global droped shape is changes every time when recursion call)!!!
-                updateGlobalValuesBeforeRecursion(true, lastBranchShape);
+                updateGlobalValues(true, lastBranchShape);
                 y--;
             }
             foreach(Node currentNode in node.childNodes)
             {
                 if (currentNode.isSimpleNode())
                 {
-                    lastBranchShape = buildTreeV2(currentNode, x, y);
+                    lastBranchShape = buildTree(currentNode, x, y);
                     //IMPORTANT (global droped shape is changes every time when recursion call)!!!
-                    updateGlobalValuesBeforeRecursion(true, lastBranchShape);
+                    updateGlobalValues(true, lastBranchShape);
                 }
                 else
                 {
-                    lastBranchShape = buildTreeV2(currentNode, x, y);
+                    lastBranchShape = buildTree(currentNode, x, y);
                     //IMPORTANT (false to shift branch) (global droped shape is changes every time when recursion call)!!!
-                    updateGlobalValuesBeforeRecursion(false, lastBranchShape);
+                    updateGlobalValues(false, lastBranchShape);
                     y -= Math.Max(currentNode.childNodes.Count, Math.Max(currentNode.childIfNodes.Count, currentNode.childElseNodes.Count));
                     y -= 0.5;
                 }
@@ -341,10 +342,10 @@ namespace DiagramConstructor
                 currentNode = nodes[i];
                 if (currentNode.isSimpleNode() && i == 0)
                 {
-                    lastBranchShape = visioManipulator.dropShapeV2(currentNode, x, y);
+                    lastBranchShape = visioManipulator.dropShape(currentNode, x, y);
                     visioManipulator.connectShapes(lastBranchShape.shape, chainParentShape.shape, ShapeForm.LINE, ifElseConnectionType);
                     //IMPORTANT (global droped shape is changes every time when recursion call)!!!
-                    updateGlobalValuesBeforeRecursion(true, lastBranchShape);
+                    updateGlobalValues(true, lastBranchShape);
                 } 
                 else if(i == 0)
                 {
@@ -359,27 +360,27 @@ namespace DiagramConstructor
                             x += 1.2;
                             startX = x;
                         }
-                        lastBranchShape = visioManipulator.dropShapeV2(currentNode, x, y);
+                        lastBranchShape = visioManipulator.dropShape(currentNode, x, y);
                         visioManipulator.connectShapes(lastBranchShape.shape, chainParentShape.shape, ShapeForm.LINE, ifElseConnectionType);
                         y--;
                         lastBranchShape = startIfElseBranch(currentNode, lastBranchShape, x, y);
                     }
                     else
                     {
-                        //IMPORTANT (false to shift branch) rest global shape baccause current shape already connected manualy
-                        updateGlobalValuesBeforeRecursion(false, null);
-                        lastBranchShape = buildTreeV2(currentNode, x, y);
+                        //IMPORTANT (false to shift branch) reset global shape baccause current shape already connected manualy
+                        updateGlobalValues(false, null);
+                        lastBranchShape = buildTree(currentNode, x, y);
                         visioManipulator.connectShapes(lastBranchShape.shape, chainParentShape.shape, ShapeForm.LINE, ifElseConnectionType);
                     }
                     if (lastBranchShape.isCommonShape())
                     {
-                        //IMPORTANT call with true for connect next dhape from FROM_TOP_TO_BOT
-                        updateGlobalValuesBeforeRecursion(true, lastBranchShape);
+                        //IMPORTANT call with true for connect next shape from FROM_TOP_TO_BOT
+                        updateGlobalValues(true, lastBranchShape);
                     }
                     else
                     {
                         //IMPORTANT (false to shift branch) call with false because lastBranchShape isn't common shape so it can not be connected FROM_TOP_TO_BOT
-                        updateGlobalValuesBeforeRecursion(false, lastBranchShape);
+                        updateGlobalValues(false, lastBranchShape);
                     }
                     coreY -= 0.2;
                 }
@@ -388,17 +389,17 @@ namespace DiagramConstructor
                     if (lastBranchShape.isCommonShape())
                     {
                         //IMPOTRANT connect shape in one branch if last shape is common
-                        updateGlobalValuesBeforeRecursion(true, lastBranchShape);
+                        updateGlobalValues(true, lastBranchShape);
                     }
-                    lastBranchShape = buildTreeV2(currentNode, x, y);
+                    lastBranchShape = buildTree(currentNode, x, y);
                     //IMPORTANT update last shape
-                    updateGlobalValuesBeforeRecursion(true, lastBranchShape);
+                    updateGlobalValues(true, lastBranchShape);
                 }
                 else
                 {
-                    lastBranchShape = buildTreeV2(currentNode, x, y);
-                    //IMPORTANT (global droped shape is changes every time when recursion call)!!!
-                    updateGlobalValuesBeforeRecursion(false, lastBranchShape);
+                    lastBranchShape = buildTree(currentNode, x, y);
+                    //IMPORTANT (global droped shape is changes every time when recursion call)
+                    updateGlobalValues(false, lastBranchShape);
                     y -= Math.Max(currentNode.childNodes.Count, Math.Max(currentNode.childIfNodes.Count, currentNode.childElseNodes.Count));
                 }
                 y--;

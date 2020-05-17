@@ -82,7 +82,6 @@ namespace DiagramConstructor.actor
         /// <returns>list of modificated nodes</returns>
         private List<Node> anylizeNodesTexts(List<Node> nodesToAnylize)
         {
-            Regex d = new Regex(@"(const)?(\s*\S*\s*)(\s*\**\s*)(\s*\S*\s*)(=|;)+\s*(0|''|"")\s*");
             Node currentNode = nodesToAnylize[0];
             for (int i = nodesToAnylize.Count - 1; i >= 0; i--)
             {
@@ -96,11 +95,6 @@ namespace DiagramConstructor.actor
                 {
                     currentNode.nodeText = currentNode.nodeText.Replace("||", " or ").Replace("|", " or ");
                     currentNode.nodeText = currentNode.nodeText.Replace("&&", " and ").Replace("&", " and ");
-                }
-                else if (currentNode.shapeForm == ShapeForm.PROCESS && d.IsMatch(currentNode.nodeText))
-                {
-                    nodesToAnylize.RemoveAt(i);
-                    continue;
                 }
                 else if (currentNode.shapeForm == ShapeForm.IN_OUT_PUT && isUnimportantOutput(currentNode.nodeText))
                 {
@@ -134,7 +128,7 @@ namespace DiagramConstructor.actor
             Node lastNode = null;
             Node currentNode = null;
             int bothNodesTextLength = 0;
-            int bothLineBrakersCount = 0;
+            int bothNodesLineBrakersCount = 0;
             for (int i = nodesToAnylize.Count - 1; i >= 0; i--)
             {
                 currentNode = nodesToAnylize[i];
@@ -156,11 +150,11 @@ namespace DiagramConstructor.actor
                     continue;
                 }
                 bothNodesTextLength = lastNode.nodeText.Length + currentNode.nodeText.Length;
-                bothLineBrakersCount = new Regex("\n").Matches(currentNode.nodeText).Count + new Regex("\n").Matches(lastNode.nodeText).Count;
+                bothNodesLineBrakersCount = new Regex("\n").Matches(currentNode.nodeText).Count + new Regex("\n").Matches(lastNode.nodeText).Count;
                 if (currentNode.shapeForm == ShapeForm.PROCESS
                     && lastNode.shapeForm == ShapeForm.PROCESS
                     && bothNodesTextLength < 50
-                    && bothLineBrakersCount < 5)
+                    && bothNodesLineBrakersCount < 5)
                 {
                     lastNode.nodeText += "\n" + currentNode.nodeText;
                     nodesToAnylize.RemoveAt(i);
@@ -168,11 +162,11 @@ namespace DiagramConstructor.actor
                 else if (currentNode.shapeForm == ShapeForm.IN_OUT_PUT
                     && lastNode.shapeForm == ShapeForm.IN_OUT_PUT
                     && bothNodesTextLength < 50
-                    && bothLineBrakersCount < 5)
+                    && bothNodesLineBrakersCount < 5)
                 {
                     if (lastNode.nodeText.Length > 15 || currentNode.nodeText.Length > 15)
                     {
-                        lastNode.nodeText.Insert(0, currentNode.nodeText.Replace("Вывод", "").Replace("Ввод", "") + ",\n");
+                        lastNode.nodeText.Insert(0, currentNode.nodeText.Replace("Вывод", "").Replace("Ввод", "") + ", " + "\n");
                     }
                     else
                     {

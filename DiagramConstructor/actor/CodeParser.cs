@@ -92,20 +92,20 @@ namespace DiagramConstructor
                 code = code.Remove(code.Length - 1, 1);
             }
             String codeBlock = "";
-            int openMarck = 0;
-            int closeMarck = 0;
+            int openMarckCount = 0;
+            int closeMarckCount = 0;
             int endIndex = 0;
             for (endIndex = 0; endIndex < code.Length; endIndex++)
             {
                 if (code[endIndex].Equals('}'))
                 {
-                    openMarck++;
+                    openMarckCount++;
                 }
                 if (code[endIndex].Equals('{'))
                 {
-                    closeMarck++;
+                    closeMarckCount++;
                 }
-                if (openMarck == closeMarck && (openMarck != 0 && closeMarck != 0))
+                if (openMarckCount == closeMarckCount && (openMarckCount != 0 && closeMarckCount != 0))
                 {
                     codeBlock = code.Substring(0, endIndex + 1);
                     break;

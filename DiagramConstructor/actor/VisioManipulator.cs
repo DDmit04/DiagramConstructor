@@ -70,9 +70,9 @@ namespace DiagramConstructor.actor
         /// <param name="x">shape x</param>
         /// <param name="y">shape y</param>
         /// <returns>placed shape</returns>
-        public ShapeWrapper dropShapeV2(ShapeForm viosioShapeForm, String text, double x, double y)
+        public ShapeWrapper dropShape(ShapeForm viosioShapeForm, String text, double x, double y)
         {
-            Master shapeMaster = getShapeMasterVisioShapeType(viosioShapeForm);
+            Master shapeMaster = getShapeMasterByShapeType(viosioShapeForm);
             Page visioPage = visioApp.ActivePage;
             Shape shapeToDrop = visioPage.Drop(shapeMaster, x, y);
             shapeToDrop.Text = text;
@@ -88,14 +88,14 @@ namespace DiagramConstructor.actor
         /// <param name="x">shape x</param>
         /// <param name="y">shape x</param>
         /// <returns>placed shape</returns>
-        public ShapeWrapper dropShapeV2(Node node, double x, double y)
+        public ShapeWrapper dropShape(Node node, double x, double y)
         {
             Master shapeMaster = begin;
             Page visioPage = visioApp.ActivePage;
             ShapeForm newShapeType = ShapeForm.BEGIN;
             if(node != null)
             {
-                shapeMaster = getShapeMasterVisioShapeType(node.shapeForm);
+                shapeMaster = getShapeMasterByShapeType(node.shapeForm);
             }
             Shape shapeToDrop = visioPage.Drop(shapeMaster, x, y);
             if (node != null)
@@ -117,7 +117,7 @@ namespace DiagramConstructor.actor
         public ShapeWrapper addSmallTextField(String text, double x, double y)
         {
             Page visioPage = visioApp.ActivePage;
-            ShapeWrapper shape = dropShapeV2(ShapeForm.SMALL_TEXT_FIELD, text, x, y);
+            ShapeWrapper shape = dropShape(ShapeForm.SMALL_TEXT_FIELD, text, x, y);
             return shape;
         }
 
@@ -131,7 +131,7 @@ namespace DiagramConstructor.actor
         public ShapeWrapper addTextField(String text, double x, double y)
         {
             Page visioPage = visioApp.ActivePage;
-            ShapeWrapper shape = dropShapeV2(ShapeForm.TEXT_FIELD, text, x, y);
+            ShapeWrapper shape = dropShape(ShapeForm.TEXT_FIELD, text, x, y);
             return shape;
         }
 
@@ -144,7 +144,7 @@ namespace DiagramConstructor.actor
         /// <param name="connectionType">shape connection type</param>
         public void connectShapes(Shape shapeFrom, Shape shapeTo, ShapeForm shapeForm, ShapeConnectionType connectionType)
         {
-            Master connectorMaster = getShapeMasterVisioShapeType(shapeForm);
+            Master connectorMaster = getShapeMasterByShapeType(shapeForm);
             VisCellIndices conectionToType = VisCellIndices.visAlignTop;
             VisCellIndices conectionFromType = VisCellIndices.visAlignBottom;
             BuilderUtills.getCellsAlignsFromConnectionType(out conectionToType, out conectionFromType, connectionType);
@@ -173,7 +173,7 @@ namespace DiagramConstructor.actor
         /// </summary>
         /// <param name="shapeForm">form to get master</param>
         /// <returns>Shape master</returns>
-        public Master getShapeMasterVisioShapeType(ShapeForm shapeForm)
+        public Master getShapeMasterByShapeType(ShapeForm shapeForm)
         {
             Master resultFigure = begin;
             switch (shapeForm)
