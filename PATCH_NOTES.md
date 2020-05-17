@@ -53,3 +53,6 @@
 
 #### Encantments
 * Add icon on .exe file
+
+### fix
+* Do while after common process now placing correctly.
