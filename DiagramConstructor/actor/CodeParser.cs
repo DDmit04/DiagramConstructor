@@ -215,7 +215,7 @@ namespace DiagramConstructor
                 else
                 {
                     String copy = nextCodeBlock;
-                    while (!codeIsEmptyMarcks(copy)) {
+                    while (!codeIsEmptyMarcks(copy) && startWithProcess(copy)) {
                         Node node = new Node();
                         nextLineDivider = copy.IndexOf(';');
                         nodeCodeLine = copy.Substring(0, nextLineDivider + 1);
@@ -271,6 +271,15 @@ namespace DiagramConstructor
         {
             Regex regex = new Regex(@"(\w*\;)");
             return !regex.IsMatch(text);
+        }
+
+        private bool startWithProcess(string text)
+        {
+            return text.IndexOf("if(") != 0
+                && text.IndexOf("elseif(") != 0
+                && text.IndexOf("for(") != 0
+                && text.IndexOf("while(") != 0
+                && text.IndexOf("do{") != 0;
         }
 
         /// <summary>
