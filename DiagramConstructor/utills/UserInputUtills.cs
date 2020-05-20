@@ -33,7 +33,7 @@ namespace DiagramConstructor.utills
 
         public static String readCode()
         {
-            int bufSize = 2048;
+            int bufSize = 4096;
             Stream inStream = Console.OpenStandardInput(bufSize);
             Console.SetIn(new StreamReader(inStream, Console.InputEncoding, false, bufSize));
 
