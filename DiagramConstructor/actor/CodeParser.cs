@@ -1,4 +1,6 @@
-﻿using System;
+﻿using DiagramConstructor.Config;
+using DiagramConstructor.utills;
+using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
@@ -8,10 +10,12 @@ namespace DiagramConstructor
     {
         private List<Node> methodNodes = new List<Node>();
 
-        private Regex methodSingleCall = new Regex(@"(\S*)\((\S*)\)");
-        private Regex methodReturnCall = new Regex(@"(\S*)(\=)(\S*)\((\S*)\)");
-        private Regex methodCallOnObject = new Regex(@"\S*\=\S*\.\S*\(\S*\)");
-        private Regex unimportantOutput = new Regex(@"\'\S*\'\,*");
+        private LanguageConfig languageConfig;
+
+        public CodeParser(LanguageConfig languageConfig)
+        {
+            this.languageConfig = languageConfig;
+        }
 
         /// <summary>
         /// Class main method convert code from string to AST
@@ -20,7 +24,9 @@ namespace DiagramConstructor
         /// <returns>AST (list of methods)</returns>
         public List<Method> ParseCode(String codeToParse)
         {
+            codeToParse = languageConfig.cleanCodeBeforeParse(codeToParse);
             List<Method> methods = new List<Method>();
+            List<Node> globalVars = new List<Node>();
             String nextMethodCode = "";
             int methodCodeBegin = 0;
             String methodBlock = "";
@@ -33,10 +39,14 @@ namespace DiagramConstructor
                 methodBlock = nextMethodCode.Substring(methodCodeBegin);
                 methodSignature = nextMethodCode.Substring(0, methodCodeBegin);
                 codeToParse = codeToParse.Replace(nextMethodCode, "");
-                methodBlock = methodBlock.Remove(0, 1).Insert(0, "");
-                methodBlock = methodBlock.Remove(methodBlock.Length - 1, 1);
+                methodBlock = methodBlock.Remove(methodBlock.IndexOf('{'), 1);
+                methodBlock = methodBlock.Remove(methodBlock.LastIndexOf('}'), 1);
                 methodNodes = parseNode(methodBlock);
                 newMethod = new Method(methodSignature, methodNodes);
+                if (methodSignature.LastIndexOf(';') != -1)
+                {
+                    globalVars.AddRange(extractGlobalVarsFromMethodSignature(methodSignature));
+                }
                 if (methodSignature.IndexOf("mian(") != 0)
                 {
                     methods.Insert(0, newMethod);
@@ -46,37 +56,34 @@ namespace DiagramConstructor
                     methods.Add(newMethod);
                 }
             }
+            foreach (Node globalVarDeclaration in globalVars)
+            {
+                methods[0].methodNodes.Insert(0, globalVarDeclaration);
+            }
             return methods;
         }
 
         /// <summary>
-        /// Check is it necessary to delete {} sorrounded string
+        /// Convert global varibles to PROCESS blocks
         /// </summary>
-        /// <param name="code">string to check</param>
-        /// <returns> string surrounded by {} and contains (if | else | while | ...) as first operand</returns>
-        private bool nextCodeIsSimple(String code)
+        /// <param name="methodName">method signature to search global varibles</param>
+        /// <returns>list of nodes - PROCESS blocks</returns>
+        public List<Node> extractGlobalVarsFromMethodSignature(String methodName)
         {
-            bool langStateIsNearToBegin = code.IndexOf("if(") == 1 
-                || code.IndexOf("while(") == 1 
-                || code.IndexOf("for(") == 1 
-                || code.IndexOf("else{") == 1;
-            bool codeIsSurroundedByMarcks = code[0].Equals('{') && code[code.Length - 1].Equals('}');
-            return codeIsSurroundedByMarcks && langStateIsNearToBegin;
-        }
-
-        /// <summary>
-        /// Delete {} surrounded string if this necessary
-        /// </summary>
-        /// <param name="code">string to modify</param>
-        /// <returns>modified string</returns> 
-        private String checkCodeSimplenes(String code)
-        {
-            if (nextCodeIsSimple(code))
+            List<Node> extractedNodes = new List<Node>();
+            Node newNode;
+            int lastGlobalVaribleEndIndex = methodName.LastIndexOf(';');
+            while (lastGlobalVaribleEndIndex != -1)
             {
-                code = code.Remove(0, 1);
-                code = code.Remove(code.Length - 1, 1);
+                newNode = new Node();
+                newNode.nodeText = methodName.Substring(0, lastGlobalVaribleEndIndex);
+                newNode.shapeForm = ShapeForm.PROCESS;
+                extractedNodes.Add(newNode);
+
+                methodName = methodName.Substring(lastGlobalVaribleEndIndex + 1);
+                lastGlobalVaribleEndIndex = methodName.LastIndexOf(';');
             }
-            return code;
+            return extractedNodes;
         }
 
         /// <summary>
@@ -94,8 +101,7 @@ namespace DiagramConstructor
             String codeBlock = "";
             int openMarckCount = 0;
             int closeMarckCount = 0;
-            int endIndex = 0;
-            for (endIndex = 0; endIndex < code.Length; endIndex++)
+            for (int endIndex = 0; endIndex < code.Length; endIndex++)
             {
                 if (code[endIndex].Equals('}'))
                 {
@@ -119,6 +125,23 @@ namespace DiagramConstructor
         }
 
         /// <summary>
+        /// Get operator text from begin of code block
+        /// </summary>
+        /// <param name="nextCodeBlock">string to extract operator text</param>
+        /// <returns>operator text</returns>
+        String extractOperatorTextFromCodeBlock(string nextCodeBlock)
+        {
+            int nextLineDivider = 0;
+            nextLineDivider = nextCodeBlock.IndexOf('{');
+            if(nextLineDivider == -1)
+            {
+                nextLineDivider = nextCodeBlock.Length;
+            }
+            nextCodeBlock = nextCodeBlock.Substring(0, nextLineDivider);
+            return nextCodeBlock;
+        }
+
+        /// <summary>
         /// Recursive method which convert code lines to AST nodes 
         /// (if it meets if | else | while | ... it create node and put in it's child nodes result of itself call)
         /// </summary>
@@ -127,137 +150,108 @@ namespace DiagramConstructor
         private List<Node> parseNode(String nodeCode)
         {
             List<Node> resultNodes = new List<Node>();
-            int nextLineDivider = 0;
+            int operatorAndCodeDivider = 0;
             String nextCodeBlock = "";
             String nodeCodeLine = "";
             while (!codeIsEmptyMarcks(nodeCode)) {
                 Node newNode = new Node();
                 nextCodeBlock = getNextCodeBlock(nodeCode);
-                if (nextCodeBlock.IndexOf("if(") == 0)
+                operatorAndCodeDivider = nextCodeBlock.IndexOf('{');
+                if (languageConfig.isLineStartWithIf(nextCodeBlock))
                 {
-                    nextLineDivider = nextCodeBlock.IndexOf('{');
-                    nodeCodeLine = nextCodeBlock.Substring(0, nextLineDivider);
-                    nodeCodeLine = replaceFirst(nodeCodeLine, "if(", ""); 
-                    nodeCodeLine = replaceFirst(nodeCodeLine, ")", "");
-                    newNode.nodeText = nodeCodeLine;
                     newNode.shapeForm = ShapeForm.IF;
+                    newNode.nodeText = extractOperatorTextFromCodeBlock(nextCodeBlock);
+                    newNode.childIfNodes = parseNode(nextCodeBlock.Substring(operatorAndCodeDivider));
 
-                    newNode.childIfNodes = parseNode(nextCodeBlock.Substring(nextLineDivider));
-
-                    String localCode = replaceFirst(nodeCode, nextCodeBlock, "");
+                    String localCode = CodeUtils.replaceFirst(nodeCode, nextCodeBlock, "");
 
                     if (!codeIsEmptyMarcks(localCode))
                     {
+                        //TO DO refactor this
                         String onotherNextBlock = getNextCodeBlock(localCode);
-                        if(onotherNextBlock.IndexOf("elseif") == 0)
+                        if(languageConfig.isLineStartWithElseIf(onotherNextBlock))
                         {
                             Regex elseifRegex = new Regex(@"(elseif\(\S+\){\S+;})+(else{\S+;})*");
                             Match match = elseifRegex.Match(localCode);
                             if(match.Success)
                             {
                                 onotherNextBlock = match.Value;
-                                nodeCode = replaceFirst(nodeCode, onotherNextBlock, "");
+                                nodeCode = CodeUtils.replaceFirst(nodeCode, onotherNextBlock, "");
                             }
                         }
-                        if (onotherNextBlock.IndexOf("else") == 0 || onotherNextBlock.IndexOf("}else") == 0)
+                        if (languageConfig.isLineStartWithElse(onotherNextBlock))
                         {
                             nodeCode = nodeCode.Replace(onotherNextBlock, "");
-                            onotherNextBlock = replaceFirst(onotherNextBlock, "else", "");
+                            onotherNextBlock = CodeUtils.replaceFirst(onotherNextBlock, "else", "");
                             newNode.childElseNodes = parseNode(onotherNextBlock);
                         }
                     }
                     resultNodes.Add(newNode);
                 } 
-                else if(nextCodeBlock.IndexOf("for(") == 0)
+                else if(languageConfig.isLineStartWithFor(nextCodeBlock))
                 {
-                    nextLineDivider = nextCodeBlock.IndexOf('{');
-                    nodeCodeLine = nextCodeBlock.Substring(0, nextLineDivider);
-                    nodeCodeLine = replaceFirst(nodeCodeLine, "for(", "");
-                    nodeCodeLine = replaceFirst(nodeCodeLine, ")", "");
-                    newNode.nodeText = nodeCodeLine;
                     newNode.shapeForm = ShapeForm.FOR;
-                    newNode.childNodes = parseNode(nextCodeBlock.Substring(nextLineDivider));
+                    newNode.nodeText = extractOperatorTextFromCodeBlock(nextCodeBlock);
+                    newNode.childNodes = parseNode(nextCodeBlock.Substring(operatorAndCodeDivider));
                     resultNodes.Add(newNode);
                 } 
-                else if(nextCodeBlock.IndexOf("while(") == 0)
+                else if(languageConfig.isLineStartWithWhile(nextCodeBlock))
                 {
-                    nextLineDivider = nextCodeBlock.IndexOf('{');
-                    nodeCodeLine = nextCodeBlock.Substring(0, nextLineDivider);
-                    nodeCodeLine = nodeCodeLine.Replace("while(", "");
-                    nodeCodeLine = replaceFirst(nodeCodeLine, ")", "");
-                    newNode.nodeText = nodeCodeLine;
                     newNode.shapeForm = ShapeForm.WHILE;
-                    newNode.childNodes = parseNode(nextCodeBlock.Substring(nextLineDivider));
+                    newNode.nodeText = extractOperatorTextFromCodeBlock(nextCodeBlock);
+                    newNode.childNodes = parseNode(nextCodeBlock.Substring(operatorAndCodeDivider));
                     resultNodes.Add(newNode);
                 } 
-                else if(nextCodeBlock.IndexOf("do{") == 0)
+                else if(languageConfig.isLineStartWithDoWhile(nextCodeBlock))
                 {
-                    String lastDoWhileNodeText = "";
-                    nextLineDivider = nextCodeBlock.IndexOf('{');
-                    int lastDoWhileNodeEndIndex = nodeCode.Substring(nextCodeBlock.Length).IndexOf(';') + 1;
-                    String lastDoWhileNodeCode = nodeCode.Substring(nextCodeBlock.Length, lastDoWhileNodeEndIndex);
-                    newNode.childNodes = parseNode(nextCodeBlock.Substring(nextLineDivider));
+                    //find first 'while' after 'do{}'
+                    int whileOperatorTextEndIndex = nodeCode.Substring(nextCodeBlock.Length).IndexOf(';');
+                    String whileOperatorText = nodeCode.Substring(nextCodeBlock.Length, whileOperatorTextEndIndex);
 
-                    lastDoWhileNodeText = lastDoWhileNodeCode;
-                    lastDoWhileNodeText = lastDoWhileNodeText.Replace("while(", "");
-                    nodeCodeLine = replaceFirst(lastDoWhileNodeText, ");", "");
+                    newNode.childNodes = parseNode(nextCodeBlock.Substring(operatorAndCodeDivider));
 
-                    Node lastDoWhileNode = new Node();
-                    lastDoWhileNode.nodeText = lastDoWhileNodeText;
-                    lastDoWhileNode.shapeForm = ShapeForm.WHILE;
+                    Node lastDoWhileNode = new Node(whileOperatorText, ShapeForm.WHILE);
+
                     newNode.childNodes.Add(lastDoWhileNode);
-
                     newNode.shapeForm = ShapeForm.DO;
                     resultNodes.Add(newNode);
 
-                    nextCodeBlock += lastDoWhileNodeCode;
+                    nextCodeBlock += whileOperatorText;
                 }
                 else
                 {
-                    String copy = nextCodeBlock;
-                    while (!codeIsEmptyMarcks(copy) && startWithProcess(copy)) {
-                        Node node = new Node();
-                        nextLineDivider = copy.IndexOf(';');
-                        nodeCodeLine = copy.Substring(0, nextLineDivider + 1);
+                    String nextCodeBlockCopy = nextCodeBlock;
+                    while (!codeIsEmptyMarcks(nextCodeBlockCopy)) {
+                        newNode = new Node();
+                        operatorAndCodeDivider = nextCodeBlockCopy.IndexOf(';');
+                        nodeCodeLine = nextCodeBlockCopy.Substring(0, operatorAndCodeDivider + 1);
                         if (!lineIsSimple(nodeCodeLine))
                         {
                             break;
                         }
-                        copy = replaceFirst(copy, nodeCodeLine, "");
-                        if (nodeCodeLine.IndexOf("cin>>") == 0 
-                            || nodeCodeLine.IndexOf("cin»") == 0 
-                            || nodeCodeLine.IndexOf("cout<<") == 0 
-                            || nodeCodeLine.IndexOf("cout«") == 0)
+                        nextCodeBlockCopy = CodeUtils.replaceFirst(nextCodeBlockCopy, nodeCodeLine, "");
+                        if (languageConfig.isLineStartWithInOutPut(nodeCodeLine))
                         {
-                            nodeCodeLine = nodeCodeLine.Replace("cin>>", "Ввод ").Replace("cin»", "Ввод ");
-                            nodeCodeLine = nodeCodeLine.Replace("cout<<", "Вывод ").Replace("cout«", "Вывод ");
-                            nodeCodeLine = nodeCodeLine.Replace("<<endl", "").Replace("«endl", "");
-                            nodeCodeLine = nodeCodeLine.Replace(">>", ", ").Replace("<<", ", ");
-                            nodeCodeLine = nodeCodeLine.Replace("»", ", ").Replace("«", ", ");
-                            nodeCodeLine = unimportantOutput.Replace(nodeCodeLine, "");
-                            node.shapeForm = ShapeForm.IN_OUT_PUT;
-
+                            newNode.shapeForm = ShapeForm.IN_OUT_PUT;
                         }
-                        else if(methodSingleCall.IsMatch(nodeCodeLine) 
-                            || methodReturnCall.IsMatch(nodeCodeLine) 
-                            || methodCallOnObject.IsMatch(nodeCodeLine))
+                        else if(languageConfig.isLineStartWithProgram(nextCodeBlock))
                         {
-                            node.shapeForm = ShapeForm.PROGRAM;
+                            newNode.shapeForm = ShapeForm.PROGRAM;
                         }
                         else
                         {
-                            node.shapeForm = ShapeForm.PROCESS;
+                            newNode.shapeForm = ShapeForm.PROCESS;
                         }
 
-                        node.nodeText = nodeCodeLine.Replace(";", "");
-                        resultNodes.Add(node);
+                        newNode.nodeText = nodeCodeLine.Replace(";", "");
+                        resultNodes.Add(newNode);
                     }
-                    if (copy.Length > 0)
+                    if (nextCodeBlockCopy.Length > 0)
                     {
-                        nextCodeBlock = replaceFirst(nextCodeBlock, copy, "");
+                        nextCodeBlock = CodeUtils.replaceFirst(nextCodeBlock, nextCodeBlockCopy, "");
                     }
                 }
-                nodeCode = replaceFirst(nodeCode, nextCodeBlock, "");
+                nodeCode = CodeUtils.replaceFirst(nodeCode, nextCodeBlock, "");
             }
             return resultNodes;
         }
@@ -273,29 +267,6 @@ namespace DiagramConstructor
             return !regex.IsMatch(text);
         }
 
-        private bool startWithProcess(string text)
-        {
-            return text.IndexOf("if(") != 0
-                && text.IndexOf("elseif(") != 0
-                && text.IndexOf("for(") != 0
-                && text.IndexOf("while(") != 0
-                && text.IndexOf("do{") != 0;
-        }
-
-        /// <summary>
-        /// Replace fist ocurence in some string of some string 
-        /// </summary>
-        /// <param name="text">text to search ocurence</param>
-        /// <param name="textToReplace">text for replace</param>
-        /// <param name="replace">text to replace </param>
-        /// <returns>modifyed text</returns>
-        private String replaceFirst(String text, String textToReplace, String replace)
-        {
-            Regex regex = new Regex(Regex.Escape(textToReplace));
-            text = regex.Replace(text, replace, 1);
-            return text;
-        }
-
         /// <summary>
         /// Check is code not started with (if | for | while | ...)
         /// </summary>
@@ -303,10 +274,11 @@ namespace DiagramConstructor
         /// <returns>bool</returns>
         private bool lineIsSimple(String line)
         {
-            return !(line.IndexOf("if(") == 0
-                || line.IndexOf("for(") == 0
-                || line.IndexOf("while(") == 0
-                || line.IndexOf("switch(") == 0);
+            return !(languageConfig.isLineStartWithIf(line) 
+                || languageConfig.isLineStartWithElseIf(line)
+                || languageConfig.isLineStartWithFor(line)
+                || languageConfig.isLineStartWithWhile(line) 
+                || languageConfig.isLineStartWithDoWhile(line));
         }
 
     }

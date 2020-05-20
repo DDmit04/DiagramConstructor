@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DiagramConstructor.Config;
+using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
@@ -6,6 +7,13 @@ namespace DiagramConstructor.actor
 {
     class CodeAnalyzer
     {
+
+        private LanguageConfig languageConfig;
+
+        public CodeAnalyzer(LanguageConfig languageConfig)
+        {
+            this.languageConfig = languageConfig;
+        }
 
         /// <summary>
         /// Modificate all method nodes
@@ -28,12 +36,7 @@ namespace DiagramConstructor.actor
                 }
                 if (method.methodSignature.LastIndexOf(';') != -1)
                 {
-                    List<Node> extractedNodes = extractGlobalVarsFromMethodSignature(method.methodSignature);
                     method.methodSignature = clearMethodSignature(method.methodSignature);
-                    foreach (Node node in extractedNodes)
-                    {
-                        method.methodNodes.Insert(0, node);
-                    }
                 }
                 anylizeNodesTexts(method.methodNodes);
                 compareNodes(method.methodNodes);
@@ -41,6 +44,11 @@ namespace DiagramConstructor.actor
             return methodsToAnylize;
         }
 
+        /// <summary>
+        /// Delete globar args from method signature
+        /// </summary>
+        /// <param name="methodName"></param>
+        /// <returns></returns>
         public String clearMethodSignature(String methodName)
         {
             int lastGlobalVaribleEndIndex = methodName.LastIndexOf(';');
@@ -50,29 +58,6 @@ namespace DiagramConstructor.actor
                 lastGlobalVaribleEndIndex = methodName.LastIndexOf(';');
             }
             return methodName;
-        }
-
-        /// <summary>
-        /// Convert global varibles to PROCESS blocks
-        /// </summary>
-        /// <param name="methodName">method signature to search global varibles</param>
-        /// <returns>list of nodes</returns>
-        public List<Node> extractGlobalVarsFromMethodSignature(String methodName)
-        {
-            List<Node> extractedNodes = new List<Node>();
-            Node newNode;
-            int lastGlobalVaribleEndIndex = methodName.LastIndexOf(';');
-            while (lastGlobalVaribleEndIndex != -1)
-            {
-                newNode = new Node();
-                newNode.nodeText = methodName.Substring(0, lastGlobalVaribleEndIndex);
-                newNode.shapeForm = ShapeForm.PROCESS;
-                extractedNodes.Add(newNode);
-
-                methodName = methodName.Substring(lastGlobalVaribleEndIndex + 1);
-                lastGlobalVaribleEndIndex = methodName.LastIndexOf(';');
-            }
-            return extractedNodes;
         }
 
         /// <summary>
@@ -89,17 +74,23 @@ namespace DiagramConstructor.actor
 
                 if (currentNode.shapeForm == ShapeForm.FOR)
                 {
+                    currentNode.nodeText = extractTextFromOperator(currentNode.nodeText, currentNode.shapeForm);
                     currentNode.nodeText = anylizeForNodeText(currentNode.nodeText);
                 }
                 else if (currentNode.shapeForm == ShapeForm.WHILE || currentNode.shapeForm == ShapeForm.IF)
                 {
+                    currentNode.nodeText = extractTextFromOperator(currentNode.nodeText, currentNode.shapeForm);
                     currentNode.nodeText = currentNode.nodeText.Replace("||", " or ").Replace("|", " or ");
                     currentNode.nodeText = currentNode.nodeText.Replace("&&", " and ").Replace("&", " and ");
                 }
-                else if (currentNode.shapeForm == ShapeForm.IN_OUT_PUT && isUnimportantOutput(currentNode.nodeText))
+                else if(currentNode.shapeForm == ShapeForm.IN_OUT_PUT)
                 {
-                    nodesToAnylize.RemoveAt(i);
-                    continue;
+                    currentNode.nodeText = extractTextFromOperator(currentNode.nodeText, currentNode.shapeForm);
+                    if(isUnimportantOutput(currentNode.nodeText))
+                    {
+                        nodesToAnylize.RemoveAt(i);
+                        continue;
+                    }
                 }
 
                 if (nodeBranchNeedAnylize(currentNode.childNodes))
@@ -125,30 +116,30 @@ namespace DiagramConstructor.actor
         /// <returns>list of compared nodes</returns>
         private List<Node> compareNodes(List<Node> nodesToAnylize)
         {
-            Node lastNode = null;
-            Node currentNode = null;
             int bothNodesTextLength = 0;
             int bothNodesLineBrakersCount = 0;
-            for (int i = nodesToAnylize.Count - 1; i >= 0; i--)
+            foreach(Node node in nodesToAnylize)
+            {
+                if (nodeBranchNeedAnylize(node.childNodes))
+                {
+                    node.childNodes = compareNodes(node.childNodes);
+                }
+                if (nodeBranchNeedAnylize(node.childIfNodes))
+                {
+                    node.childIfNodes = compareNodes(node.childIfNodes);
+                }
+                if (nodeBranchNeedAnylize(node.childElseNodes))
+                {
+                    node.childElseNodes = compareNodes(node.childElseNodes);
+                }
+            }
+            Node currentNode = null;
+            Node lastNode = nodesToAnylize[nodesToAnylize.Count - 1];
+            // nodesToAnylize.Count - 2 !!!
+            for (int i = nodesToAnylize.Count - 2; i >= 0; i--)
             {
                 currentNode = nodesToAnylize[i];
-                if (nodeBranchNeedAnylize(currentNode.childNodes))
-                {
-                    currentNode.childNodes = compareNodes(currentNode.childNodes);
-                }
-                if (nodeBranchNeedAnylize(currentNode.childIfNodes))
-                {
-                    currentNode.childIfNodes = compareNodes(currentNode.childIfNodes);
-                }
-                if (nodeBranchNeedAnylize(currentNode.childElseNodes))
-                {
-                    currentNode.childElseNodes = compareNodes(currentNode.childElseNodes);
-                }
-                if (i == nodesToAnylize.Count - 1)
-                {
-                    lastNode = currentNode;
-                    continue;
-                }
+                
                 bothNodesTextLength = lastNode.nodeText.Length + currentNode.nodeText.Length;
                 bothNodesLineBrakersCount = new Regex("\n").Matches(currentNode.nodeText).Count + new Regex("\n").Matches(lastNode.nodeText).Count;
                 if (currentNode.shapeForm == ShapeForm.PROCESS
@@ -156,7 +147,15 @@ namespace DiagramConstructor.actor
                     && bothNodesTextLength < 50
                     && bothNodesLineBrakersCount < 5)
                 {
-                    lastNode.nodeText += "\n" + currentNode.nodeText;
+                    lastNode.nodeText = currentNode.nodeText + "\n" + lastNode.nodeText;
+                    nodesToAnylize.RemoveAt(i);
+                }
+                else if (currentNode.shapeForm == ShapeForm.PROGRAM
+                    && lastNode.shapeForm == ShapeForm.PROGRAM
+                    && bothNodesTextLength < 35
+                    && bothNodesLineBrakersCount < 5)
+                {
+                    lastNode.nodeText = currentNode.nodeText + "\n" + lastNode.nodeText;
                     nodesToAnylize.RemoveAt(i);
                 }
                 else if (currentNode.shapeForm == ShapeForm.IN_OUT_PUT
@@ -166,11 +165,11 @@ namespace DiagramConstructor.actor
                 {
                     if (lastNode.nodeText.Length > 15 || currentNode.nodeText.Length > 15)
                     {
-                        lastNode.nodeText.Insert(0, currentNode.nodeText.Replace("Вывод", "").Replace("Ввод", "") + ", " + "\n");
+                        lastNode.nodeText = currentNode.nodeText + ",\n" + lastNode.nodeText.Replace(this.languageConfig.outputReplacement, "").Replace(this.languageConfig.inputReplacement, "");
                     }
                     else
                     {
-                        lastNode.nodeText.Insert(0, currentNode.nodeText.Replace("Вывод", "").Replace("Ввод", "") + ", ");
+                        lastNode.nodeText = currentNode.nodeText + ", " + lastNode.nodeText.Replace(this.languageConfig.outputReplacement, "").Replace(this.languageConfig.inputReplacement, "");
                     }
                     nodesToAnylize.RemoveAt(i);
                 }
@@ -189,16 +188,20 @@ namespace DiagramConstructor.actor
         /// <returns>is console output just constant string</returns>
         private bool isUnimportantOutput(String startText)
         {
-            Regex unimportantOutput = new Regex(@"^Вывод\s*(\'\s*\S*\s*\'|\s*)(endl)*$");
+            Regex unimportantOutput = new Regex(@"^" + this.languageConfig.outputStatement + @"\s*(\'\s*\S*\s*\'|\s*)$");
 
             return unimportantOutput.IsMatch(startText) && startText.IndexOf(',') == -1;
         }
 
+        /// <summary>
+        /// Check is node branch need to be anylized
+        /// </summary>
+        /// <param name="nodes">nodes to check</param>
+        /// <returns>is neccesary to analyze node branch</returns>
         private bool nodeBranchNeedAnylize(List<Node> nodes)
         {
             return nodes.Count > 1 || (nodes.Count > 0 && nodes[0].shapeForm != ShapeForm.IN_OUT_PUT);
         }
-
 
         /// <summary>
         /// Modificate text in FOR shape
@@ -215,9 +218,9 @@ namespace DiagramConstructor.actor
             Regex incrementName = new Regex(@"(\d*|\w*)[^\W*]");
             // ++
             incrementText = incrementName.Replace(incrementText, "", 1);
-            // ++ (in case of incrementText = '+=10' incrementAction = '+=')
+            // ++ (in case of incrementText - '+=10' incrementAction - '+=')
             String incrementAction = incrementText.Substring(0, 2);
-            // '' (in case of incrementText = '+=10' incrementArg = '10')
+            // '' (in case of incrementText - '+=10' incrementArg - '10')
             String incrementArg = incrementText.Replace(incrementAction, "");
 
             if (incrementAction.Equals("++"))
@@ -248,6 +251,33 @@ namespace DiagramConstructor.actor
             startText = startText.Substring(0, index);
             startText = startText.Replace(";", " (" + incrementText + ") ");
             return startText;
+        }
+
+        /// <summary>
+        /// Gets operator text from code line
+        /// </summary>
+        /// <param name="nodeCode">operator code to extract text</param>
+        /// <param name="nodeType">operator type to extract</param>
+        /// <returns>extracted operator text</returns>
+        String extractTextFromOperator(string nodeCode, ShapeForm nodeType)
+        {
+            if (nodeType == ShapeForm.IF)
+            {
+                nodeCode = this.languageConfig.formatIf(nodeCode);
+            }
+            else if (nodeType == ShapeForm.FOR)
+            {
+                nodeCode = this.languageConfig.formatFor(nodeCode);
+            }
+            else if (nodeType == ShapeForm.WHILE)
+            {
+                nodeCode = this.languageConfig.formatWhile(nodeCode);
+            }
+            else if(nodeType == ShapeForm.IN_OUT_PUT)
+            {
+                nodeCode = this.languageConfig.formatInOutPut(nodeCode);
+            }
+            return nodeCode;
         }
 
     }

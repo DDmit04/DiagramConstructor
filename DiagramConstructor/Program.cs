@@ -1,4 +1,5 @@
 ﻿using DiagramConstructor.actor;
+using DiagramConstructor.Config;
 using System;
 
 namespace DiagramConstructor
@@ -12,7 +13,13 @@ namespace DiagramConstructor
             Console.WriteLine("DIAGRAM CONSTRUCTOR 1.0.4.");
             Console.WriteLine("Author: Dmitrochenkov Daniil.\n\n");
 
-            App app = new App(new CodeParser(), new CodeAnalyzer(), new DiagramBuilder());
+            LanguageConfig languageConfig = new CppLanguageConfig();
+
+            CodeParser codeParser = new CodeParser(languageConfig);
+            CodeAnalyzer codeAnalyzer = new CodeAnalyzer(languageConfig);
+
+            App app = new App(codeParser, codeAnalyzer, new DiagramBuilder());
+
             app.RunApp();
         }
 

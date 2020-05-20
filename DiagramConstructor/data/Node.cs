@@ -14,6 +14,14 @@ namespace DiagramConstructor
         public List<Node> childIfNodes { get; set; } = new List<Node>();
         public List<Node> childElseNodes { get; set; } = new List<Node>();
 
+        public Node(){}
+
+        public Node(String nodeText, ShapeForm shapeForm)
+        {
+            this.nodeText = nodeText;
+            this.shapeForm = shapeForm;
+        }
+
         public bool isSimpleNode()
         {
             return shapeForm == ShapeForm.PROCESS || shapeForm == ShapeForm.PROGRAM || shapeForm == ShapeForm.IN_OUT_PUT;
