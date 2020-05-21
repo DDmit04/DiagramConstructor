@@ -45,9 +45,13 @@ namespace DiagramConstructor
         public static String getUserInputs()
         {
             String code = "";
-            if (Configuration.testRun)
+            if(Configuration.testRun == TestRunType.SINGLE_TEST)
             {
-                code = "whileElseIfTest(){while(a>10){if(a>10){s=10;actor=10;cout<<'someoutput'<<Count;cout<<'someoutput';}elseif(a<10){s=10;actor=10;cout<<'someoutput'<<Count;cout<<'someoutput';}elseif(a>10){s=10;actor=10;cout<<'someoutput'<<Count;cout<<'someoutput';}else{s=10;actor=10;cout<<'someoutput'<<Count;cout<<'someoutput';}}}";
+                code = "main(){if(a>10){do{a=10;b=20;cout<<'lul'<<a;}while(b<100);}}";
+            }
+            else if (Configuration.testRun == TestRunType.FULL_TEST)
+            {
+                code = "forForTest(){for(i=0;i<10;i++){for(i=0;i<10;i++){s=10;actor=10;cout<<'someoutput'<<Count;cout<<'someoutput'<<cout<<ded;}}}whileForTest(){while((a>10||v<10)&&s==10){for(i=0;i<10;i++){s=10;actor=10;cout<<'someoutput'<<Count;cout<<'someoutput';}}}forWhileTest(){for(i=0;i<10;i++){while(a>10){s=10;actor=10;cout<<'someoutput'<<Count;cout<<'someoutput';}}}whileIfTest(){while(a>10){if((a>10||v<10)&&s==10){s=10;actor=10;cout<<'someoutput'<<Count;cout<<'someoutput';}else{s=10;actor=10;cout<<'someoutput'<<Count;cout<<'someoutput';}}}whileElseIfTest(){while(a>10){if(a>10){s=10;actor=10;cout<<'someoutput'<<Count;cout<<'someoutput';}elseif(a<10){s=10;actor=10;cout<<'someoutput'<<Count;cout<<'someoutput';}elseif(a>10){s=10;actor=10;cout<<'someoutput'<<Count;cout<<'someoutput';}else{s=10;actor=10;cout<<'someoutput'<<Count;cout<<'someoutput';}}}forIfTest(){for(i=0;i<10;i++){if(){s=10;actor=10;cout<<'someoutput'<<Count;cout<<'someoutput';}else{s=10;actor=10;cout<<'someoutput'<<Count;cout<<'someoutput';}}}forElseIfTest(){for(i=0;i<10;i++){if(a>10){s=10;actor=10;cout<<'someoutput'<<Count;cout<<'someoutput';}elseif(a<10){s=10;actor=10;cout<<'someoutput'<<Count;cout<<'someoutput';}elseif(a>10){s=10;actor=10;cout<<'someoutput'<<Count;cout<<'someoutput';}else{s=10;actor=10;cout<<'someoutput'<<Count;cout<<'someoutput';}}}iftest(){if(actor<0){s=10;doSome();actor=10;cout<<'someoutput'<<Count;cout<<'someoutput';}}ifElsetest(){if(actor<0){s=10;doSome();actor=10;cout<<'someoutput'<<Count;cout<<'someoutput';}else{s=10;doSome();actor=10;cout<<'someoutput'<<Count;cout<<'someoutput';}}elseifTest(){if(actor<0){s=10;doSome();actor=10;cout<<'someoutput'<<Count;cout<<'someoutput';}elseif(actor<10){s=10;doSome();actor=10;cout<<'someoutput'<<Count;cout<<'someoutput';}elseif(actor<10){s=10;doSome();actor=10;cout<<'someoutput'<<Count;cout<<'someoutput';}else{s=10;doSome();actor=10;cout<<'someoutput'<<Count;cout<<'someoutput';}}forTest(){for(i=0;i<10;i++){s=10;doSome();actor=10;cout<<'someoutput'<<Count;cout<<'someoutput';}}whileTest(){while(actor>0){s=10;doSome();actor=10;cout<<'someoutput'<<Count;cout<<'someoutput';}}doWhileTest(){do{s=10;doSome();actor=10;cout<<'someoutput'<<Count;cout<<'someoutput';}while(sbyte>10);}";
             }
             else
             {

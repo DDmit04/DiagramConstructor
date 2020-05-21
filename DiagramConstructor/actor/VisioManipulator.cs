@@ -51,7 +51,7 @@ namespace DiagramConstructor.actor
         public String closeDocument()
         {
             String resulrFilePath = Configuration.customFilePath + @"\result" + DateTime.Now.ToString("yyyy_MM_dd__HH_mm_ss_fff") + ".vsdx";
-            if (Configuration.testRun)
+            if (Configuration.testRun == TestRunType.FULL_TEST || Configuration.testRun == TestRunType.SINGLE_TEST)
             {
                 resulrFilePath = Configuration.customFilePath + @"\result_test" + ".vsdx";
             }
