@@ -142,32 +142,36 @@ namespace DiagramConstructor.actor
             double ifBrannchMaxLength = 0;
             if (node.childNodes.Count != 0)
             {
-                foreach (Node n in node.childNodes)
+                foreach (Node childNode in node.childNodes)
                 {
                     commonBrannchMaxLength++;
-                    commonBrannchMaxLength += calcStatementHeight(n);
+                    commonBrannchMaxLength += calcStatementHeight(childNode);
                 }
             }
             if (node.childIfNodes.Count != 0)
             {
-                foreach (Node n in node.childIfNodes)
+                foreach (Node childNode in node.childIfNodes)
                 {
                     ifBrannchMaxLength++;
-                    ifBrannchMaxLength += calcStatementHeight(n);
+                    ifBrannchMaxLength += calcStatementHeight(childNode);
                 }
             }
             if (node.childElseNodes.Count != 0)
             {
-                foreach (Node n in node.childElseNodes)
+                foreach (Node childNode in node.childElseNodes)
                 {
                     elseBrannchMaxLength++;
-                    elseBrannchMaxLength += calcStatementHeight(n);
+                    elseBrannchMaxLength += calcStatementHeight(childNode);
                 }
             }
             double result = Math.Max(commonBrannchMaxLength, Math.Max(elseBrannchMaxLength, ifBrannchMaxLength));
             if(node.shapeForm == ShapeForm.WHILE || node.shapeForm == ShapeForm.FOR || node.shapeForm == ShapeForm.IF)
             {
                 result += 0.2;
+            } 
+            else if(node.shapeForm == ShapeForm.DO) 
+            {
+                result -= 1;
             }
             return result;
         }
