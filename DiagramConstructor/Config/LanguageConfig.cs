@@ -24,6 +24,11 @@ namespace DiagramConstructor.Config
         public String inputReplacement;
         public String outputReplacement;
 
+        public Regex ifStatementRegex;
+        public Regex forStatementRegex;
+        public Regex whileStatementRegex;
+
+
         protected LanguageConfig()
         {
             this.ifStatement = "if(";
@@ -37,6 +42,9 @@ namespace DiagramConstructor.Config
             this.outputStatement = "cout<<";
             this.inputReplacement = "Ввод ";
             this.outputReplacement = "Вывод ";
+            ifStatementRegex = new Regex(this.ifStatement + @"\(\S*\))");
+            forStatementRegex = new Regex(this.forStatement + @"\(\S*\))");
+            whileStatementRegex = new Regex(this.whileStatement + @"\(\S*\))");
         }
 
         /// <summary>
@@ -138,6 +146,8 @@ namespace DiagramConstructor.Config
         /// <returns>formated line (without statement string)</returns>
         public virtual string formatFor(string codeLine)
         {
+            Match match = this.forStatementRegex.Match(codeLine);
+            codeLine = match.Value;
             codeLine = CodeUtils.replaceFirst(codeLine, this.forStatement, "");
             return codeLine;
         }
@@ -149,6 +159,8 @@ namespace DiagramConstructor.Config
         /// <returns>formated line (without statement string)</returns>
         public virtual string formatIf(string codeLine)
         {
+            Match match = this.ifStatementRegex.Match(codeLine);
+            codeLine = match.Value;
             codeLine = CodeUtils.replaceFirst(codeLine, this.ifStatement, "");
             return codeLine;
         }
@@ -160,6 +172,8 @@ namespace DiagramConstructor.Config
         /// <returns>formated line (without statement string)</returns>
         public virtual string formatWhile(string codeLine)
         {
+            Match match = this.whileStatementRegex.Match(codeLine);
+            codeLine = match.Value;
             codeLine = CodeUtils.replaceFirst(codeLine, this.whileStatement, "");
             return codeLine;
         }

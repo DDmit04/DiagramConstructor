@@ -205,8 +205,12 @@ namespace DiagramConstructor
                 else if(languageConfig.isLineStartWithDoWhile(nextCodeBlock))
                 {
                     //find first 'while' after 'do{}'
+                    string a = nodeCode.Substring(nextCodeBlock.Length);
                     int whileOperatorTextEndIndex = nodeCode.Substring(nextCodeBlock.Length).IndexOf(';');
                     String whileOperatorText = nodeCode.Substring(nextCodeBlock.Length, whileOperatorTextEndIndex);
+
+                    Match match = languageConfig.whileStatementRegex.Match(whileOperatorText);
+                    whileOperatorText = match.Value;
 
                     newNode.childNodes = parseNode(nextCodeBlock.Substring(operatorAndCodeDivider));
 
@@ -263,7 +267,7 @@ namespace DiagramConstructor
         /// <returns>Is code contains only { and } chars</returns>
         private bool codeIsEmptyMarcks(String text)
         {
-            Regex regex = new Regex(@"(\w*\;)");
+            Regex regex = new Regex(@"(\w+\;)");
             return !regex.IsMatch(text);
         }
 
