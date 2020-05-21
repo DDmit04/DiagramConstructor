@@ -10,7 +10,7 @@ namespace DiagramConstructor
         static void Main(string[] args)
         {
 
-            Console.WriteLine("DIAGRAM CONSTRUCTOR 1.0.4.");
+            Console.WriteLine("DIAGRAM CONSTRUCTOR 1.1.0.");
             Console.WriteLine("Author: Dmitrochenkov Daniil.\n\n");
 
             LanguageConfig languageConfig = new CppLanguageConfig();
