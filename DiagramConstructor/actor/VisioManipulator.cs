@@ -142,13 +142,13 @@ namespace DiagramConstructor.actor
         /// <param name="shapeTo">sec shape to connect</param>
         /// <param name="connectorMaster">shape wich connect shapes</param>
         /// <param name="connectionType">shape connection type</param>
-        public void connectShapes(Shape shapeFrom, Shape shapeTo, ShapeForm shapeForm, ShapeConnectionType connectionType)
+        public void connectShapes(Shape shapeFrom, Shape shapeTo, ShapeForm shapeForm, ShapeConnectionType connectionType, double x = 4.25, double y = 10)
         {
             Master connectorMaster = getShapeMasterByShapeType(shapeForm);
             VisCellIndices conectionToType = VisCellIndices.visAlignTop;
             VisCellIndices conectionFromType = VisCellIndices.visAlignBottom;
             BuilderUtills.getCellsAlignsFromConnectionType(out conectionToType, out conectionFromType, connectionType);
-            ConnectWithDynamicGlueAndConnector(shapeFrom, shapeTo, connectorMaster, conectionToType, conectionFromType);
+            ConnectWithDynamicGlueAndConnector(shapeFrom, shapeTo, connectorMaster, conectionToType, conectionFromType, x, y);
         }
 
         /// <summary>
@@ -156,15 +156,15 @@ namespace DiagramConstructor.actor
         /// </summary>
         /// <param name="invisibleBlock">invisible block shape wrapper</param>
         /// <param name="lastBranchShape">last branch shape wrapper</param>
-        public void connectLastShapeToInvisibleBlock(ShapeWrapper invisibleBlock, ShapeWrapper lastBranchShape)
+        public void connectLastShapeToInvisibleBlock(ShapeWrapper invisibleBlock, ShapeWrapper lastBranchShape, double x = 4.25, double y = 10)
         {
             if (lastBranchShape.isCommonShape())
             {
-                connectShapes(invisibleBlock.shape, lastBranchShape.shape, ShapeForm.LINE, ShapeConnectionType.FROM_BOT_TO_CENTER);
+                connectShapes(invisibleBlock.shape, lastBranchShape.shape, ShapeForm.LINE, ShapeConnectionType.FROM_BOT_TO_CENTER, x, y);
             }
             else
             {
-                connectShapes(invisibleBlock.shape, lastBranchShape.shape, ShapeForm.LINE, ShapeConnectionType.FROM_RIGHT_TO_CENTER);
+                connectShapes(invisibleBlock.shape, lastBranchShape.shape, ShapeForm.LINE, ShapeConnectionType.FROM_RIGHT_TO_CENTER, x, y);
             }
         }
 
@@ -235,14 +235,20 @@ namespace DiagramConstructor.actor
         /// <param name="connectorMaster">shape wich connect shapes</param>
         /// <param name="fromPoint">point to connect on first shape</param>
         /// <param name="toPoint">point to connect on sec shape</param>
-        private void ConnectWithDynamicGlueAndConnector(Shape shapeFrom, Shape shapeTo, Master connectorMaster, VisCellIndices fromPoint, VisCellIndices toPoint)
+        private void ConnectWithDynamicGlueAndConnector(
+            Shape shapeFrom, 
+            Shape shapeTo, 
+            Master connectorMaster, 
+            VisCellIndices fromPoint, 
+            VisCellIndices toPoint,
+            double x = 0, double y = 0)
         {
             Cell beginXCell;
             Cell endXCell;
             Shape connector;
 
             Page visioPage = visioApp.ActivePage;
-            connector = visioPage.Drop(connectorMaster, 4.25, 11);
+            connector = visioPage.Drop(connectorMaster, x, y);
 
             beginXCell = connector.get_CellsSRC(
                 (short)VisSectionIndices.visSectionObject,

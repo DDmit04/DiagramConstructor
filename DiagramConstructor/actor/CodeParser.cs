@@ -205,10 +205,10 @@ namespace DiagramConstructor
                 else if(languageConfig.isLineStartWithDoWhile(nextCodeBlock))
                 {
                     //find first 'while' after 'do{}'
-                    string a = nodeCode.Substring(nextCodeBlock.Length);
                     int whileOperatorTextEndIndex = nodeCode.Substring(nextCodeBlock.Length).IndexOf(';');
                     String whileOperatorText = nodeCode.Substring(nextCodeBlock.Length, whileOperatorTextEndIndex);
 
+                    //get only 'while' statement which beelong to 'do-while'
                     Match match = languageConfig.whileStatementRegex.Match(whileOperatorText);
                     whileOperatorText = match.Value;
 

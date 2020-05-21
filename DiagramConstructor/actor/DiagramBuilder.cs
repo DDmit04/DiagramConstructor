@@ -166,7 +166,7 @@ namespace DiagramConstructor
             if (globalLastDropedShape != null)
             {
                 ShapeConnectionType shapeConnectionType = BuilderUtills.defineConnectionType(globalLastDropedShape, currentNodeShape, globalIsSameBranch);
-                visioManipulator.connectShapes(globalLastDropedShape.shape, currentNodeShape.shape, ShapeForm.LINE, shapeConnectionType);
+                visioManipulator.connectShapes(globalLastDropedShape.shape, currentNodeShape.shape, ShapeForm.LINE, shapeConnectionType, coreX, coreY);
             }
             ShapeWrapper lastBranchShape = currentNodeShape;
             if (node.shapeForm == ShapeForm.IF)
@@ -277,24 +277,24 @@ namespace DiagramConstructor
             visioManipulator.addSmallTextField("Да", x - 0.7, y + 1.2);
             visioManipulator.addSmallTextField("Нет", x + 0.7, y + 1.2);
 
-            ShapeWrapper lastBranchShape = buildIfElseTreeBranchV2(node.childIfNodes, currentNodeShape, ShapeConnectionType.FROM_LEFT_TO_TOP, x - 1.2, y);
+            ShapeWrapper lastBranchShape = buildIfElseTreeBranch(node.childIfNodes, currentNodeShape, ShapeConnectionType.FROM_LEFT_TO_TOP, x - 1.2, y);
 
             double statementHeight = BuilderUtills.calcStatementHeight(node);
 
             ShapeWrapper invisibleBlock = visioManipulator.dropShape(ShapeForm.INVISIBLE_BLOCK, "", x, y - statementHeight);
 
-            visioManipulator.connectLastShapeToInvisibleBlock(invisibleBlock, lastBranchShape);
+            visioManipulator.connectLastShapeToInvisibleBlock(invisibleBlock, lastBranchShape, coreX, coreY);
 
             if (node.childElseNodes.Count != 0)
             {
                 //actions in if branch changes coreY (y - y of first if and else branches operators)
                 coreY = y;
-                lastBranchShape = buildIfElseTreeBranchV2(node.childElseNodes, currentNodeShape, ShapeConnectionType.FROM_RIGHT_TO_TOP, x + 1.2, y);
-                visioManipulator.connectLastShapeToInvisibleBlock(invisibleBlock, lastBranchShape);
+                lastBranchShape = buildIfElseTreeBranch(node.childElseNodes, currentNodeShape, ShapeConnectionType.FROM_RIGHT_TO_TOP, x + 1.2, y);
+                visioManipulator.connectLastShapeToInvisibleBlock(invisibleBlock, lastBranchShape, coreX, coreY);
             }
             else
             {
-                visioManipulator.connectShapes(invisibleBlock.shape, currentNodeShape.shape, ShapeForm.LINE, ShapeConnectionType.FROM_RIGHT_TO_CENTER);
+                visioManipulator.connectShapes(invisibleBlock.shape, currentNodeShape.shape, ShapeForm.LINE, ShapeConnectionType.FROM_RIGHT_TO_CENTER, coreX, coreY);
             }
             coreY = y - statementHeight - 0.5;
             return invisibleBlock;
@@ -337,11 +337,7 @@ namespace DiagramConstructor
             if (chainParentShape != null)
             {
                 ShapeConnectionType shapeConnectionType = BuilderUtills.defineConnectionTypeWithBranchParent(chainParentShape, lastBranchShape);
-                visioManipulator.connectShapes(chainParentShape.shape, lastBranchShape.shape, ShapeForm.ARROW_LEFT, shapeConnectionType);
-            }
-            if (y < coreY)
-            {
-                coreY = y;
+                visioManipulator.connectShapes(chainParentShape.shape, lastBranchShape.shape, ShapeForm.ARROW_LEFT, shapeConnectionType, coreX, coreY);
             }
             refrashCoreY(y);
             return lastBranchShape;
@@ -376,16 +372,25 @@ namespace DiagramConstructor
                             startX = x;
                         }
                         lastBranchShape = visioManipulator.dropShape(currentNode, x, y);
-                        visioManipulator.connectShapes(lastBranchShape.shape, chainParentShape.shape, ShapeForm.LINE, ifElseConnectionType);
+                        visioManipulator.connectShapes(lastBranchShape.shape, chainParentShape.shape, ShapeForm.LINE, ifElseConnectionType, coreX, coreY);
                         y--;
                         lastBranchShape = startIfElseBranch(currentNode, lastBranchShape, x, y);
+                    }
+                    else if(currentNode.shapeForm == ShapeForm.DO)
+                    {
+                        //place invisible block to connect 'if' and first block of branch
+                        lastBranchShape = visioManipulator.dropShape(ShapeForm.INVISIBLE_BLOCK, "", x, y);
+                        visioManipulator.connectShapes(lastBranchShape.shape, chainParentShape.shape, ShapeForm.LINE, ifElseConnectionType, coreX, coreY);
+                        //IMPORTANT change global shape bacause current shape already connected manualy
+                        continueNodeBranch(lastBranchShape);
+                        lastBranchShape = buildTree(currentNode, x, y);
                     }
                     else
                     {
                         //IMPORTANT reset global shape baccause current shape already connected manualy
                         endNodeBranch();
                         lastBranchShape = buildTree(currentNode, x, y);
-                        visioManipulator.connectShapes(lastBranchShape.shape, chainParentShape.shape, ShapeForm.LINE, ifElseConnectionType);
+                        visioManipulator.connectShapes(lastBranchShape.shape, chainParentShape.shape, ShapeForm.LINE, ifElseConnectionType, coreX, coreY);
                     }
                     if (lastBranchShape.isCommonShape())
                     {
