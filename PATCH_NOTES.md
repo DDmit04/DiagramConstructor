@@ -50,9 +50,20 @@
 * In IF and WHILE '==' now correctly replaceing by '='.
 * Add spaces before and after 'or' and 'and'.
 * Blocks after 'else-if' statement now placing correct.
+* Do while after common process now placing correctly.
 
 #### Encantments
 * Add icon on .exe file
 
-### fix
-* Do while after common process now placing correctly.
+# Realise 1.1.0
+
+### Program code
+* Separate language config to other class.
+* Improve code quality in DiagramBuilder class.
+
+### Bug fixes
+* Fix 'web effect' in large diagrams.
+* 'do-while' statement as first block in 'if' or 'else' branch now placing correctly.
+
+#### Encantments
+* 'do-while' statement now placing closer to perv block.

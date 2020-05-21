@@ -43,15 +43,6 @@ Console С# application creating visio diagrams from C++ code.
 
 * Use only english words in code (even in comments).
 
-* Init varible before use it (optional).
-```diff
-
-- int a = someValue;
-
-+ int a = 0;
-+ a = somValue;
-```
-
 * Code to input in console must be converted (no spaces, tabs and line breaks):
 
 ``` diff
