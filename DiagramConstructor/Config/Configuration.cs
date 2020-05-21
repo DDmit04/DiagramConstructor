@@ -22,7 +22,7 @@ namespace DiagramConstructor
         /// <summary>
         /// Use test code to run program
         /// </summary>
-        public static TestRunType testRun = TestRunType.FULL_TEST;
+        public static TestRunType testRun = TestRunType.PRODACTION;
 
     }
 }

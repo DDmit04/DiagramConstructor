@@ -46,11 +46,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Config\CppLanguageConfig.cs" />
+    <Compile Include="Config\LanguageConfig.cs" />
+    <Compile Include="enum\TestRunType.cs" />
     <Compile Include="utills\BuilderUtills.cs" />
     <Compile Include="actor\CodeAnalyzer.cs" />
     <Compile Include="actor\VisioManipulator.cs" />
     <Compile Include="App.cs" />
-    <Compile Include="Configuration.cs" />
+    <Compile Include="Config\Configuration.cs" />
     <Compile Include="enum\ShapeForm.cs" />
     <Compile Include="enum\ShapeConnectionType.cs" />
     <Compile Include="actor\CodeParser.cs" />
@@ -60,6 +63,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="data\ShapeWrapper.cs" />
+    <Compile Include="utills\CodeUtils.cs" />
     <Compile Include="utills\UserInputUtills.cs" />
   </ItemGroup>
   <ItemGroup>
