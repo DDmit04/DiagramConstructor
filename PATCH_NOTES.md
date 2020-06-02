@@ -1,9 +1,9 @@
 # Realise 1.0.1
 #### Bug fixes
-* First block after if statement now place correctly.
-* First block after "for" or "while" inside if statement now connecting correctly.
+* First block after 'if' statement now place correctly.
+* First block after 'for' or 'while' inside if statement now connecting correctly.
 * PROGRAM and IN_OUT_PUT blocks now determined better.
-* If statement (with "while" inside one of branches) end point now placeing correctly.
+* If statement (with 'while' inside one of branches) end point now placeing correctly.
 
 #### Encantments
 * All primitive data types (and arrays of them) and "void" now removing from all code text.
@@ -15,7 +15,7 @@
 # Realise 1.0.2
 
 ### New
-* Add "do-while" support.
+* Add 'do-while' support.
 
 #### Bug fixes
 * Code comments now deleting from diagram correctly.
